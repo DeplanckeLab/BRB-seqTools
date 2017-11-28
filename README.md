@@ -38,8 +38,8 @@ BRB-seq tools is a suite dedicated to help you analyze these data, until the gen
 For further analyses (filtering, normalization, dimension reduction, clustering, differential expression), we recommend using [ASAP web tool](https://www.ncbi.nlm.nih.gov/pubmed/28541377): [asap.epfl.ch](asap.epfl.ch).
 
 You have two options depending on what you aim to do with your RNA-seq data:
-* Perform demultiplexing before aligning your data to the reference genome ![](https://img.shields.io/badge/Tool-Demultiplex-blue.svg): This option will generate one fastq file per sample. Every fastq file can then be aligned and processed independently with standard RNA-seq pipelines.
-* Align the R2 file and demultiplex after alignment ![](https://img.shields.io/badge/Tool-CreateDGEMatrix-blue.svg): This option allow you to perform only one alignment on the whole R2 fastq file. This will generate one BAM file (no need to be sorted) with all your samples in it. Then 'BRB-seq tools' suite can be used to generate the read and UMI count matrices from the R2 BAM and the R1 fastq files.
+* ![](https://img.shields.io/badge/Tool-Demultiplex-blue.svg) Perform demultiplexing before aligning your data to the reference genome. This option will generate one fastq file per sample. Every fastq file can then be aligned and processed independently with standard RNA-seq pipelines.
+* ![](https://img.shields.io/badge/Tool-CreateDGEMatrix-blue.svg) Align the R2 file and demultiplex after alignment. This option allow you to perform only one alignment on the whole R2 fastq file. This will generate one BAM file (no need to be sorted) with all your samples in it. Then 'BRB-seq tools' suite can be used to generate the read and UMI count matrices from the R2 BAM and the R1 fastq files.
 
 ### Installation
 To check that BRB-seq Tools is working properly, run the following command:
@@ -72,7 +72,7 @@ Options:
 -UMI %i         If your barcode pattern contains UMI ('U'), you should specify this parameter as the length of the UMI.
 ```
 
-> Note: When using this tool, the UMIs are put as indexes of the output .fastq files
+> **Note:** When using this tool, the UMIs are put as indexes of the output .fastq files
 
 ### CreateDGEMatrix ![](https://img.shields.io/badge/Tool-CreateDGEMatrix-blue.svg)
 This tool is used when you don't need the intermediary .fastq & .bam files from all your multiplexed samples.
@@ -95,7 +95,7 @@ Options:
 -UMI %i         If your barcode pattern contains UMI ('U'), you should specify this parameter as the length of the UMI.
 ```
 
-> Note: The original BRB-seq protocol contains a UMI construct. But UMIs are not yet proven effective for bulk RNA-seq analysis. As such, you can generate a library without UMIs, or even not sequence the UMIs from R2 read. If UMIs are present, both UMI and read count matrices will be generated. If not, only the read count table will be generated.
+> **Note:** The original BRB-seq protocol contains a UMI construct. But UMIs are not yet proven effective for bulk RNA-seq analysis. As such, you can generate a library without UMIs, or even not sequence the UMIs from R2 read. If UMIs are present, both UMI and read count matrices will be generated. If not, only the read count table will be generated.
 
 ### Trim ![](https://img.shields.io/badge/Tool-Trim-blue.svg)
 This tool is used to trim the BRB-seq construct & the polyA sequences from the R2 fastq file.
@@ -110,7 +110,7 @@ Options:
 -minLength %i   If resulting trimmed reads are < this number, it is removed from the output fastq file  [default=10]
 ```
 
-> Note: If you use STAR for alignment, this step is optional, as it will not change much the results of the alignment (our tests have shown that the improvement is real but very minor)
+> **Note:** If you use STAR for alignment, this step is optional, as it will not change much the results of the alignment (our tests have shown that the improvement is real but very minor)
 
 ## Directory content
 * src: all source files required for compilation
