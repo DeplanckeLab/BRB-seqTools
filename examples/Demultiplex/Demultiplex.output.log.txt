@@ -1,0 +1,15 @@
+java -jar BRBseqTools.1.0.jar Demultiplex -r1 ../examples/lib_example_R1.fastq.gz -r2 ../examples/lib_example_R2.fastq.gz -c ../examples/lib_example_barcodes.txt -p BU -UMI 14
+
+BRBSeqTools [Demultiplex]
+
+Config: Barcode Pattern = BU
+Config: Nb Allowed Diff = 1
+No output Folder is specified, using default one: "../examples". You can specify an output path by using the '-o' option.
+Config: B1 contains 4 barcodes: [ GACGGG GTCAAG ATGTAA CCACGC ]
+Config: B1 length [#nucleotides] = 6
+
+Analyzing barcode Pattern...
+According to barcode pattern, reads of R1 FastQ file should contain 20 characters.
+
+Starting demultiplexing...
+100000 reads were processed from R1 & R2 fastq files [1 s 786 ms]

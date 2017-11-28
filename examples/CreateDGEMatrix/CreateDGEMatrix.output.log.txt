@@ -1,0 +1,35 @@
+java -jar BRBseqTools.1.0.jar CreateDGEMatrix -f ../examples/lib_example_R1.fastq.gz -b ../examples/lib_example_R2.bam -c ../examples/lib_example_barcodes.txt -gtf ../examples/Homo_sapiens.GRCh38.90.gtf.gz -p BU -UMI 14
+
+BRBSeqTools [CreateDGEMatrix]
+
+Barcode Pattern = BU
+Nb Allowed Diff = 1
+ChunkSize = 10000000 i.e. no more than 10000000 reads will be stored in RAM.
+No output Folder is specified, using default one: "../examples". You can specify an output path by using the '-o' option.
+No folder for temporary generated files is specified, using output folder as default: "../examples". You can specify an temp folder by using the '-t' option.
+Config: B1 contains 4 barcodes: [ GACGGG GTCAAG ATGTAA CCACGC ]
+Config: B1 length [#nucleotides] = 6
+
+Analyzing barcode Pattern...
+According to barcode pattern, reads of R1 FastQ file should contain 20 characters.
+
+Reading GTF file provided: ../examples/Homo_sapiens.GRCh38.90.gtf.gz
+1199851 'exons' are annotating 58302 unique genes in the provided GTF file. In total 58302 'gene' annotations are found in the GTF file.
+
+Reading reads barcodes/UMI from the R1 fastq file...
+100000 reads were processed from fastq file [209 ms]
+Created 1 temporary fastq files
+1930 reads have no matching barcodes (1.93%)
+
+Reading the reads from the BAM file...
+78224 reads were processed from BAM file [683 ms]
+Created 1 temporary BAM files
+67956 'Mapped' reads (86.87%)
+5058 'Ambiguous' reads (6.47%)
+5210 'No Features' reads (6.66%)
+0 'Not Unique' reads (0%)
+0 'Not Aligned' reads (0%)
+0 'Too Low aQual' reads (0%)
+
+Starting demultiplexing...
+DGE count & UMI matrices were created [911 ms]

@@ -32,7 +32,7 @@ After sequencing your BRB-seq libraries, you should obtain two fastq files per l
 * R2 fastq file: This file should contain the exact same number of reads (and read names) than the R1 file. Except that the sequence of the reads are the sequences representing the RNA fragments.
 
 BRB-seq tools is a suite dedicated to help you analyze these data, until the generation of the output count/UMI matrix.
-For further analyses (filtering, normalization, dimension reduction, clustering, differential expression), we recommend using [ASAP web portal](https://www.ncbi.nlm.nih.gov/pubmed/28541377) that you can freely access at [asap.epfl.ch](asap.epfl.ch).
+For further analyses (filtering, normalization, dimension reduction, clustering, differential expression), we recommend using [ASAP web portal](https://www.ncbi.nlm.nih.gov/pubmed/28541377) that you can freely access at [asap.epfl.ch](https://asap.epfl.ch).
 
 You have two options depending on what you aim to do with your RNA-seq data:
 * ![](https://img.shields.io/badge/Tool-Demultiplex-blue.svg) Perform demultiplexing before aligning your data to the reference genome. This option will generate one fastq file per sample. Every fastq file can then be aligned and processed independently with standard RNA-seq pipelines.
@@ -57,10 +57,10 @@ This tool is used when you need to generate all the fastq files corresponding to
 
 Options:
 ```
--r1 %s          Path of R1 FastQ files (containing barcode and optionally UMIs).
--r2 %s          Path of R2 FastQ files (containing read sequence).
+-r1 %s          Path of R1 FastQ files (containing barcode and optionally UMIs) [can be gzipped or raw].
+-r2 %s          Path of R2 FastQ files (containing read sequence) [can be gzipped or raw].
 -c %s           Path of Barcode/Samplename mapping file.
--n %i           Number of allowed difference with the barcode [ambiguous reads will be automatically discarded].
+-n %i           Number of allowed difference with the barcode [Default = 1]. Ambiguous barcodes (same distance from two or more existing barcodes) will be automatically discarded.
 -o %s           Output folder
 -p %s           Barcode pattern/order found in the reads of the R1 FastQ file. Barcode names should match the barcode file (default = 'BU' i.e. barcode followed by the UMI).
                         'B' [required] is used for specifying the barcode position.
@@ -68,6 +68,17 @@ Options:
                         Character '?' [optional] can be used to ignore specific nucleotides.
 -UMI %i         If your barcode pattern contains UMI ('U'), you should specify this parameter as the length of the UMI.
 ```
+
+Examples:
+```bash
+java -jar BRBseqTools.1.0.jar Demultiplex -r1 lib_example_R1.fastq.gz -r2 lib_example_R2.fastq.gz -c lib_example_barcodes.txt -p BU -UMI 14
+```
+or, if no UMI:
+```bash
+java -jar BRBseqTools.1.0.jar Demultiplex -r1 lib_example_R1.fastq.gz -r2 lib_example_R2.fastq.gz -c lib_example_barcodes.txt -p B
+```
+
+You can download/edit this **[example of barcode/samplename mapping file](../master/examples/lib_example_barcodes.txt)**
 
 > **Note:** When using this tool, the UMIs are put as indexes of the output .fastq files
 
@@ -77,10 +88,10 @@ It greatly simplifies the demultiplexing and analysis, and directly generates a 
 
 Options:
 ```
--f %s           Path of R1 FastQ file.
+-f %s           Path of R1 FastQ file [can be gzipped or raw].
 -b %s           Path of R2 aligned BAM file [do not need to be sorted or indexed].
 -c %s           Path of Barcode/Samplename mapping file.
--gtf %s         Path of GTF file.
+-gtf %s         Path of GTF file [can be gzipped or raw].
 -n %i           Number of allowed difference with the barcode [ambiguous reads will be automatically discarded].
 -o %s           Output folder
 -t %s           Path of existing folder for storing temporary files
@@ -92,6 +103,13 @@ Options:
 -UMI %i         If your barcode pattern contains UMI ('U'), you should specify this parameter as the length of the UMI.
 ```
 
+Example:
+```bash
+java -jar BRBseqTools.1.0.jar CreateDGEMatrix -f lib_example_R1.fastq.gz -b lib_example_R2.bam -c lib_example_barcodes.txt -gtf Homo_sapiens.GRCh38.90.gtf.gz -p BU -UMI 14
+```
+
+You can download/edit this **[example of barcode/samplename mapping file](../master/examples/lib_example_barcodes.txt)**
+
 > **Note:** The original BRB-seq protocol contains a UMI construct. But UMIs are not yet proven effective for bulk RNA-seq analysis. As such, you can generate a library without UMIs, or even not sequence the UMIs from R2 read. If UMIs are present, both UMI and read count matrices will be generated. If not, only the read count table will be generated.
 
 ### Trim ![](https://img.shields.io/badge/Tool-Trim-blue.svg)
@@ -100,19 +118,24 @@ It can also be used to trim all the demultiplexed .fastq files after the ![](htt
 
 Options:
 ```
--f %s           Path of FastQ file to trim (or containing folder for processing all fastq files recursively).
+-f %s           Path of FastQ file to trim (or containing folder for processing all fastq files at once).
 -o %s           Output folder
 -uniqueBarcode  If the fastq file(s) contain(s) only one barcode (for e.g. after demultiplexing), this option can be used for searching the specific barcode (most occuring) in the construct and trimming it when present.
 -polyA %i       Trim polyA strings that have more than this length (without mismatch), and all 3' string that follows [default=6]
 -minLength %i   If resulting trimmed reads are < this number, it is removed from the output fastq file  [default=10]
 ```
 
+Example:
+```bash
+java -jar BRBseqTools.1.0.jar Trim -f lib_example_R2.fastq.gz
+```
+
 > **Note:** If you use STAR for alignment, this step is optional, as it will not change much the results of the alignment (our tests have shown that the improvement is real but very minor)
 
 ## Directory content
-* src: all source files required for compilation
-* lib: all JAR dependencies required for compilation / execution
-* releases: latest release of BRB-seq Tools
+* **src**: all source files required for compilation
+* **lib**: all JAR dependencies required for compilation / execution
+* **releases**: latest release of BRB-seq Tools
 
 ## Author
 Vincent Gardeux - vincent.gardeux@epfl.ch

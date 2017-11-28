@@ -1,0 +1,2 @@
+sample	nbReads	nbRemaininingReads	nbContaminated	nbPolyATrimmed	nbRemoved	nbPolyABefore
+lib_example_R2.fastq.gz	100000	99278	5199	8809	722	5833

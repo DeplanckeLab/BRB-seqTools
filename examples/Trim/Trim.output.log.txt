@@ -1,0 +1,16 @@
+java -jar BRBseqTools.1.0.jar Trim -f ../examples/lib_example_R2.fastq.gz
+
+BRBSeqTools [Trim]
+
+No output Folder is specified, using default one: "../examples/".
+You can specify an output path by using the '-o' option.
+
+Trimming lib_example_R2.fastq.gz...
+100000 reads were processed from fastq file [2 s 147 ms]
+100000 reads in file.
+99278 are written in the trimmed file.
+5199 reads were contaminated.
+722 reads were removed.
+8809 reads were trimmed for polyA (>6 'A's).
+Nb reads with polyA >= 6 'A's BEFORE trimming = 5833
+Trimmming done in 2 s 170 ms
