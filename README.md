@@ -59,7 +59,7 @@ Options:
 ```
 -r1 %s          Path of R1 FastQ files (containing barcode and optionally UMIs) [can be gzipped or raw].
 -r2 %s          Path of R2 FastQ files (containing read sequence) [can be gzipped or raw].
--c %s           Path of Barcode/Samplename mapping file.
+-c %s           Path of Barcode/Samplename mapping file¹.
 -n %i           Number of allowed difference with the barcode [Default = 1]. Ambiguous barcodes (same distance from two or more existing barcodes) will be automatically discarded.
 -o %s           Output folder
 -p %s           Barcode pattern/order found in the reads of the R1 FastQ file. Barcode names should match the barcode file (default = 'BU' i.e. barcode followed by the UMI).
@@ -69,7 +69,7 @@ Options:
 -UMI %i         If your barcode pattern contains UMI ('U'), you should specify this parameter as the length of the UMI.
 ```
 
-Examples:
+Example:
 ```bash
 java -jar BRBseqTools.1.0.jar Demultiplex -r1 lib_example_R1.fastq.gz -r2 lib_example_R2.fastq.gz -c lib_example_barcodes.txt -p BU -UMI 14
 ```
@@ -78,9 +78,9 @@ or, if no UMI:
 java -jar BRBseqTools.1.0.jar Demultiplex -r1 lib_example_R1.fastq.gz -r2 lib_example_R2.fastq.gz -c lib_example_barcodes.txt -p B
 ```
 
-You can download/edit this **[example of barcode/samplename mapping file](../master/examples/lib_example_barcodes.txt)**
+¹You can download/edit this **[example of barcode/samplename mapping file](../master/examples/lib_example_barcodes.txt)**
 
-> **Note:** When using this tool, the UMIs are put as indexes of the output .fastq files
+> **Note:** When using this tool, UMIs are kept as indexes in all output .fastq files
 
 ### CreateDGEMatrix ![](https://img.shields.io/badge/Tool-CreateDGEMatrix-blue.svg)
 This tool is used when you don't need the intermediary .fastq & .bam files from all your multiplexed samples.
@@ -90,7 +90,7 @@ Options:
 ```
 -f %s           Path of R1 FastQ file [can be gzipped or raw].
 -b %s           Path of R2 aligned BAM file [do not need to be sorted or indexed].
--c %s           Path of Barcode/Samplename mapping file.
+-c %s           Path of Barcode/Samplename mapping file¹.
 -gtf %s         Path of GTF file [can be gzipped or raw].
 -n %i           Number of allowed difference with the barcode [ambiguous reads will be automatically discarded].
 -o %s           Output folder
@@ -108,7 +108,7 @@ Example:
 java -jar BRBseqTools.1.0.jar CreateDGEMatrix -f lib_example_R1.fastq.gz -b lib_example_R2.bam -c lib_example_barcodes.txt -gtf Homo_sapiens.GRCh38.90.gtf.gz -p BU -UMI 14
 ```
 
-You can download/edit this **[example of barcode/samplename mapping file](../master/examples/lib_example_barcodes.txt)**
+¹You can download/edit this **[example of barcode/samplename mapping file](../master/examples/lib_example_barcodes.txt)**
 
 > **Note:** The original BRB-seq protocol contains a UMI construct. But UMIs are not yet proven effective for bulk RNA-seq analysis. As such, you can generate a library without UMIs, or even not sequence the UMIs from R2 read. If UMIs are present, both UMI and read count matrices will be generated. If not, only the read count table will be generated.
 
