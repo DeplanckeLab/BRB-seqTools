@@ -24,7 +24,7 @@ If the output looks something like java version "1.8.x", you are good to go.
 If not, you may need to update your version; see the [Oracle Java website](http://www.oracle.com/technetwork/java/javase/downloads/) to download the latest JRE (for users) or JDK (for developers).
 
 ### Picard
-The software relies on [Picard Tools](http://broadinstitute.github.io/picard/), but the Picard jar is embedded in the released JAR, so no need to install it yourself.
+The software relies on [Picard Tools](http://broadinstitute.github.io/picard/), but the Picard JAR is already embedded in the released JAR, so no need to install it yourself.
 
 ## Usage
 After sequencing your BRB-seq libraries, you should obtain two fastq files per library: 
@@ -32,7 +32,7 @@ After sequencing your BRB-seq libraries, you should obtain two fastq files per l
 * R2 fastq file: This file should contain the exact same number of reads (and read names) than the R1 file. Except that the sequence of the reads are the sequences representing the RNA fragments.
 
 BRB-seq tools is a suite dedicated to help you analyze these data, until the generation of the output count/UMI matrix.
-For further analyses (filtering, normalization, dimension reduction, clustering, differential expression), we recommend using [ASAP web tool](https://www.ncbi.nlm.nih.gov/pubmed/28541377): [asap.epfl.ch](asap.epfl.ch).
+For further analyses (filtering, normalization, dimension reduction, clustering, differential expression), we recommend using [ASAP web portal](https://www.ncbi.nlm.nih.gov/pubmed/28541377) that you can freely access at [asap.epfl.ch](asap.epfl.ch).
 
 You have two options depending on what you aim to do with your RNA-seq data:
 * ![](https://img.shields.io/badge/Tool-Demultiplex-blue.svg) Perform demultiplexing before aligning your data to the reference genome. This option will generate one fastq file per sample. Every fastq file can then be aligned and processed independently with standard RNA-seq pipelines.
