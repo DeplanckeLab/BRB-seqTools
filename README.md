@@ -10,7 +10,7 @@ A suite of tools for the pre-processing of BRB-seq data (bulk RNA-seq)
 Vincent Gardeux, vincent.gardeux@epfl.ch
 
 ## Download software
-BRB-seq command-line tools are provided as a single executable jar file. 
+BRB-seq command-line tools are provided as a [single executable jar file](../blob/master/releases/BRBseqTools.1.0.jar).
 The .jar file contains all required materials and can be run on any terminal.
 
 ## Dependencies
