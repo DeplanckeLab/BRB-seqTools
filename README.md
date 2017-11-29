@@ -69,6 +69,8 @@ Options:
 -UMI %i         If your barcode pattern contains UMI ('U'), you should specify this parameter as the length of the UMI.
 ```
 
+¹You can download/edit this **[example of barcode/samplename mapping file](../master/examples/lib_example_barcodes.txt)**
+
 Example:
 ```bash
 java -jar BRBseqTools.1.0.jar Demultiplex -r1 lib_example_R1.fastq.gz -r2 lib_example_R2.fastq.gz -c lib_example_barcodes.txt -p BU -UMI 14
@@ -77,8 +79,6 @@ or, if no UMI:
 ```bash
 java -jar BRBseqTools.1.0.jar Demultiplex -r1 lib_example_R1.fastq.gz -r2 lib_example_R2.fastq.gz -c lib_example_barcodes.txt -p B
 ```
-
-¹You can download/edit this **[example of barcode/samplename mapping file](../master/examples/lib_example_barcodes.txt)**
 
 > **Note:** When using this tool, UMIs are kept as indexes in all output .fastq files
 
@@ -103,12 +103,12 @@ Options:
 -UMI %i         If your barcode pattern contains UMI ('U'), you should specify this parameter as the length of the UMI.
 ```
 
+¹You can download/edit this **[example of barcode/samplename mapping file](../master/examples/lib_example_barcodes.txt)**
+
 Example:
 ```bash
 java -jar BRBseqTools.1.0.jar CreateDGEMatrix -f lib_example_R1.fastq.gz -b lib_example_R2.bam -c lib_example_barcodes.txt -gtf Homo_sapiens.GRCh38.90.gtf.gz -p BU -UMI 14
 ```
-
-¹You can download/edit this **[example of barcode/samplename mapping file](../master/examples/lib_example_barcodes.txt)**
 
 > **Note:** The original BRB-seq protocol contains a UMI construct. But UMIs are not yet proven effective for bulk RNA-seq analysis. As such, you can generate a library without UMIs, or even not sequence the UMIs from R2 read. If UMIs are present, both UMI and read count matrices will be generated. If not, only the read count table will be generated.
 
@@ -131,6 +131,46 @@ java -jar BRBseqTools.1.0.jar Trim -f lib_example_R2.fastq.gz
 ```
 
 > **Note:** If you use STAR for alignment, this step is optional, as it will not change much the results of the alignment (our tests have shown that the improvement is real but very minor)
+
+## Example of full pipeline (using STAR)
+
+First if you don't already have an indexed genome, you need to build the index (for STAR)
+```bash
+# Download last release of homo sapiens .fasta file on Ensembl
+wget ftp://ftp.ensembl.org/pub/release-90/fasta/homo_sapiens/dna/Homo_sapiens.GRCh38.dna.primary_assembly.fa.gz
+# Unzip
+gzip -d Homo_sapiens.GRCh38.dna.primary_assembly.fa.gz
+# Download last release of homo sapiens .gtf file on Ensembl
+wget ftp://ftp.ensembl.org/pub/release-90/gtf/homo_sapiens/Homo_sapiens.GRCh38.90.gtf.gz
+# Unzip
+gzip -d Homo_sapiens.GRCh38.90.gtf.gz
+# Generate the STAR genome index (in 'STAR_Index' folder) => This require ~30G RAM
+mkdir STAR_Index/
+STAR --runMode genomeGenerate --genomeDir STAR_Index/ --genomeFastaFiles Homo_sapiens.GRCh38.dna.primary_assembly.fa --sjdbGTFfile Homo_sapiens.GRCh38.90.gtf
+# Note: you can add the argument '--runThreadN 4' for running 4 threads in parallel (or more if your computer has enough cores)
+# Note: if genome is not human, you need to add/tune the argument '--genomeSAindexNbases xx' with xx = log2(nbBasesInGenome)/2 - 1
+#	For e.g. for drosophila melanogaster xx ~ 12.43, thus you should add the argument '--genomeSAindexNbases 12'
+```
+
+When the index is built, you will never need to rebuild it. Then you can use only the following script:
+```bash
+# (Optional) Trim the read containing the sequence fragments (generates a 'lib_example_R2.trimmed.fastq.gz' file)
+java -jar BRBseqTools.1.0.jar Trim -f lib_example_R2.fastq.gz
+# Create output folder
+mkdir BAM/
+# Align only the R2 fastq file (using STAR, no sorting/indexing is needed)
+STAR --runMode alignReads --genomeDir STAR_Index/ --outFilterMultimapNmax 1 --readFilesCommand zcat --outSAMtype BAM Unsorted --outFileNamePrefix BAM/ --readFilesIn lib_example_R2.trimmed.fastq.gz
+# Note: you can add the argument '--runThreadN 4' for running 4 threads in parallel (or more if your computer has enough cores)
+# Note: the '--outFilterMultimapNmax 1' option is recommended for removing multiple mapping reads from the output BAM
+# (optional) Rename the output aligned BAM
+mv BAM/Aligned.out.bam BAM/lib_example_R2.bam
+# Demultiplex and generate output count/UMI matrix
+java -jar BRBseqTools.1.0.jar CreateDGEMatrix -f lib_example_R1.fastq.gz -b BAM/lib_example_R2.bam -c lib_example_barcodes.txt -gtf Homo_sapiens.GRCh38.90.gtf -p BU -UMI 14
+# Note: This example suppose that R1 has barcode followed by 14bp UMI (see above for other cases)
+# Note: 'lib_example_barcodes.txt' should be created by the user and should contain the mapping between the barcode and the sample name¹
+```
+
+¹You can download/edit this **[example of barcode/samplename mapping file](../master/examples/lib_example_barcodes.txt)**
 
 ## Directory content
 * **src**: all source files required for compilation
