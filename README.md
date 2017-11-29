@@ -172,6 +172,9 @@ java -jar BRBseqTools.1.0.jar CreateDGEMatrix -f lib_example_R1.fastq.gz -b BAM/
 
 ¹You can download/edit this **[example of barcode/samplename mapping file](../master/examples/lib_example_barcodes.txt)**
 
+Then you can load the generated 'output.dge.reads.txt' count matrix in R and performs your analyses (or 'output.dge.umis.txt' if you prefer working with UMIs).
+Or you can upload this file to https://asap.epfl.ch and run the analysis pipeline online.
+
 ## Directory content
 * **src**: all source files required for compilation
 * **lib**: all JAR dependencies required for compilation / execution
