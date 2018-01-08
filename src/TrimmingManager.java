@@ -17,7 +17,7 @@ import tools.Utils;
 
 public class TrimmingManager 
 {
-	public static final int MAXREADSIZE = 100;
+	public static final int MAXREADSIZE = 1000;
 	public static int[] contaminated = new int[MAXREADSIZE];
 	public static int[] polyADist_before = new int[MAXREADSIZE];
 	public static int[] polyADist_after = new int[MAXREADSIZE];
