@@ -155,7 +155,7 @@ public class TrimmingManager
 		}
 		System.out.println("The limit of 100 occurences was not reached.");
 		System.out.println("Most occuring barcode is " + reverseComplement(maxbc) + " ("+max+" times)");
-		return maxbc;
+		return null;
 	}
 	
 	private static BufferedReader readFileFromBeginning(String fastQFile) throws Exception
@@ -225,7 +225,7 @@ public class TrimmingManager
 		String barcode_RC = null;
 		if(Parameters.autoFindBarcode)
 		{
-			autoFindBarcode(br);
+			barcode_RC = autoFindBarcode(br);
 			br.close();
 			if(barcode_RC == null) System.err.println("No barcode was detected during the automatic search... Switching to standard trimming mode.");
 			br = readFileFromBeginning(fastQFile);
