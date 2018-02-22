@@ -9,11 +9,17 @@ import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.HashMap;
 import java.util.HashSet;
+import java.util.List;
 import java.util.Map;
+import java.util.TreeSet;
 import java.util.zip.GZIPInputStream;
 
+import htsjdk.samtools.Cigar;
+import htsjdk.samtools.CigarElement;
+import model.GTF;
 import model.Parameters;
 import model.Read;
+import model.TmpFileManager;
 
 public class Utils 
 {
@@ -76,12 +82,12 @@ public class Utils
 	}
 	
 	/**
-	 * Read FastQ file containing the mapping between read name, barcode and UMI.
+	 * Read FastQ file containing the mapping between read name, barcode, UMI and phreds
 	 * @param fastQ input file
 	 * @return BufferedReader handle
 	 * @throws Exception
 	 */
-	public static Read nextRead(BufferedReader br) throws Exception
+	public static Read nextRead(BufferedReader br, boolean doQual) throws Exception
 	{
 		Read read = new Read();
 		String header = br.readLine(); // Get first line = READNAME + INDEX
@@ -99,7 +105,7 @@ public class Utils
 		String barcode = null;
 		try
 		{
-			barcode = indexes.substring(Parameters.barcode1Range[0], Parameters.barcode1Range[1]);
+			if(Parameters.l1 != -1) barcode = indexes.substring(Parameters.barcode1Range[0], Parameters.barcode1Range[1]); // If there is a barcode to look for
 			if(Parameters.UMILength != -1) read.UMI = indexes.substring(Parameters.UMIRange[0], Parameters.UMIRange[1]);
 		}
 		catch(IndexOutOfBoundsException boe)
@@ -109,20 +115,42 @@ public class Utils
 			System.err.println("Index found in FastQ "+ indexes +" is not according to the pattern: " + Parameters.barcodePattern);
 			System.exit(-1);
 		}
-		// Check if barcode exists
-		if(Parameters.BC1.contains(barcode)) { read.barcodeMatch = true; read.barcode = barcode;}
-		else
+		if(Parameters.l1 != -1) // If there is a barcode to look for
 		{
-			String barcodeSaved = saveBarcode(barcode, Parameters.BC1, Parameters.nbAllowedDiff); // Saving
-			if(barcodeSaved != null)
+			if(Parameters.inputConfigFile != null) // If there is a configuration file specified
 			{
-				read.barcodeMatch = true;
-				read.barcode = barcodeSaved;
+				// Check if barcode exists
+				if(Parameters.BC1.contains(barcode)) { read.barcodeMatch = true; read.barcode = barcode;}
+				else
+				{
+					String barcodeSaved = saveBarcode(barcode, Parameters.BC1, Parameters.nbAllowedDiff); // Saving
+					if(barcodeSaved != null)
+					{
+						read.barcodeMatch = true;
+						read.barcode = barcodeSaved;
+					}
+					else read.barcode = barcode; // Barcode not FOUND and not SAVED. By default barcodeSaved = false
+				}
 			}
-			else read.barcode = barcode; // Barcode not FOUND and not SAVED. By default barcodeSaved = false
+			else read.barcode = barcode;
 		}
 		br.readLine(); // Third line = we don't care
-		br.readLine(); // Fourth line = we don't care
+		String line = br.readLine();  // Fourth line = qualities
+		if(doQual)
+		{
+			line = line.trim();
+			try
+			{
+				if(Parameters.l1 != -1) read.qualityBC = line.substring(Parameters.barcode1Range[0], Parameters.barcode1Range[1]);
+				if(Parameters.UMILength != -1) read.qualityUMI = line.substring(Parameters.UMIRange[0], Parameters.UMIRange[1]);
+			}
+			catch(IndexOutOfBoundsException boe)
+			{
+				br.close();
+				System.err.println("Error while parsing R1 FastQ file PHRED scores");
+				System.exit(-1);
+			}
+		}
 		return read;
 	}
 	
@@ -176,6 +204,87 @@ public class Utils
 		}
 		if(sav.equals("")) return null;
 		return sav;
+	}
+	
+	public static HashSet<String> getOverlappingGenes(String chr, int start, int end, Cigar c, boolean readNegativeStrandFlag) throws Exception
+	{
+		HashSet<String> res = new HashSet<>();
+		List<CigarElement> l = c.getCigarElements();
+		int s = start;
+		for(CigarElement cigar:l)
+		{
+			switch(cigar.getOperator())
+			{
+				case M:
+					res.addAll(GTF.findOverlappingGenes(chr, s, s + cigar.getLength(), readNegativeStrandFlag));
+					s += cigar.getLength();
+					break;
+				case N:
+					s += cigar.getLength();
+					break;
+				case D:
+					s += cigar.getLength();
+					break;
+				case EQ:
+					System.out.println("CIGAR = " + c);
+					return new HashSet<>(); // TODO
+				case H:
+					System.out.println("CIGAR = " + c);
+					return new HashSet<>(); // TODO
+				case I:
+					// Do nothing
+					break;
+				case P:
+					System.out.println("CIGAR = " + c);
+					return new HashSet<>(); // TODO
+				case S:
+					// Do nothing (alignment start is after any S & alignment end before any S)
+					break;
+				case X:
+					System.out.println("CIGAR = " + c);
+					return new HashSet<>(); // TODO
+			}
+		}
+		
+		if(s != end + 1) throw new Exception("Error while reading CIGAR");
+		return res;
+	}
+	
+	/**
+	 *  Reading reads barcodes/UMI from the R1 fastq file to map the UMI/barcode with the read name (lost after alignment)
+	 * @throws Exception Yes I know...
+	 */
+	public static void readR1Fastq(boolean readQual) throws Exception
+	{
+		System.out.println("\nReading reads barcodes/UMI from the R1 fastq file...");
+		BufferedReader br = Utils.readFastq(Parameters.inputFastQFileR1);
+		TreeSet<String> lines = new TreeSet<String>();
+		int noBarcodeMatch = 0;
+		Long start = System.currentTimeMillis();
+		Parameters.nbTmpFastq = 1; // Number of temporary files
+		Read read = Utils.nextRead(br, readQual);
+		while(read != null)
+		{
+			Parameters.nbReads++;
+			if(Parameters.nbReads %Parameters.chunkSize == 0) 
+			{
+				TmpFileManager.createTmpFile(Parameters.tmpFolder + "fastq."+Parameters.nbTmpFastq+".tmp", lines);
+				Parameters.nbTmpFastq++;
+				lines = new TreeSet<String>();
+				System.out.println(Parameters.nbReads + " reads were processed from fastq file [" + Utils.toReadableTime(System.currentTimeMillis() - start) + "]");
+			}
+			if(!read.barcodeMatch && Parameters.inputConfigFile != null) { noBarcodeMatch++; read.barcode = "Unknown";}
+			if(!readQual) lines.add(read.name + "\t" + read.barcode + "\t" + read.UMI);
+			else lines.add(read.name + "\t" + read.barcode + "\t" + read.UMI + "\t" + read.qualityBC + "\t" + read.qualityUMI);
+			read = Utils.nextRead(br, readQual);
+		}
+		br.close();
+				
+		TmpFileManager.createTmpFile(Parameters.tmpFolder + "fastq."+Parameters.nbTmpFastq+".tmp", lines);
+		System.out.println(Parameters.nbReads + " reads were processed from fastq file [" + Utils.toReadableTime(System.currentTimeMillis() - start) + "]");		
+		System.out.println("Created " + Parameters.nbTmpFastq + " temporary fastq files");
+		
+		if(Parameters.inputConfigFile != null) System.out.println(noBarcodeMatch + " reads have no matching barcodes (" + Parameters.pcFormatter.format(((float)noBarcodeMatch / Parameters.nbReads) * 100) + "%)");
 	}
 	
 	/**
@@ -239,7 +348,6 @@ public class Utils
 	 */
 	public static void patterning() throws Exception
 	{
-		if(Parameters.l1 == -1) throw new Exception("Impossible to evaluate length of barcode");
 		Parameters.lengthBarcode = 0;
 		System.out.println("\nAnalyzing barcode Pattern...");
 		for(int j = 0; j < Parameters.barcodePattern.length(); j++) 

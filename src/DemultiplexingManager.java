@@ -35,7 +35,7 @@ public class DemultiplexingManager
 		BufferedReader br2 = Utils.readFastq(Parameters.inputFastQFileR2);
 		
 		// Initialize by reading the 2 first reads of both R1 & R2 files
-		Read read1 = Utils.nextRead(br);
+		Read read1 = Utils.nextRead(br, false);
 		Read read2 = Utils.nextDataRead(br2);
 		
 		// Check the separator for writing UMI in output fastq files
@@ -69,7 +69,7 @@ public class DemultiplexingManager
 					System.exit(-1);
 				}
 			}
-			read1 = Utils.nextRead(br);
+			read1 = Utils.nextRead(br, false);
 			read2 = Utils.nextDataRead(br2);
 		}
 	    br.close();

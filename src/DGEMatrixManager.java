@@ -1,18 +1,13 @@
-import java.io.BufferedReader;
 import java.io.BufferedWriter;
 import java.io.FileWriter;
 import java.util.HashSet;
-import java.util.List;
 import java.util.TreeSet;
 
-import htsjdk.samtools.Cigar;
-import htsjdk.samtools.CigarElement;
 import htsjdk.samtools.SAMRecord;
 import htsjdk.samtools.SAMRecordIterator;
 import htsjdk.samtools.SamReader;
 import htsjdk.samtools.SamReaderFactory;
 import htsjdk.samtools.ValidationStringency;
-import model.GTF;
 import model.Parameters;
 import model.Read;
 import model.TmpFileManager;
@@ -21,48 +16,6 @@ import tools.Utils;
 
 public class DGEMatrixManager 
 {
-	/**
-	 *  Reading reads barcodes/UMI from the R1 fastq file to map the UMI/barcode with the read name (lost after alignment)
-	 * @throws Exception Yes I know...
-	 */
-	public static void readR1Fastq() throws Exception
-	{
-		System.out.println("\nReading reads barcodes/UMI from the R1 fastq file...");
-		BufferedReader br = Utils.readFastq(Parameters.inputFastQFileR1);
-		TreeSet<String> lines = new TreeSet<String>();
-		int noBarcodeMatch = 0;
-		Long start = System.currentTimeMillis();
-		Parameters.nbTmpFastq = 1; // Number of temporary files
-		Read read = Utils.nextRead(br);
-		while(read != null)
-		{
-			Parameters.nbReads++;
-			if(Parameters.nbReads %Parameters.chunkSize == 0) 
-			{
-				BufferedWriter bw = new BufferedWriter(new FileWriter(Parameters.tmpFolder + "fastq."+Parameters.nbTmpFastq+".tmp"));
-				for(String l:lines) bw.write(l + "\n");
-				bw.close();
-				Parameters.nbTmpFastq++;
-				lines = new TreeSet<String>();
-				System.out.println(Parameters.nbReads + " reads were processed from fastq file [" + Utils.toReadableTime(System.currentTimeMillis() - start) + "]");
-			}
-			if(!read.barcodeMatch) { noBarcodeMatch++; read.barcode = "Unknown";}
-			lines.add(read.name + "\t" + read.barcode + "\t" + read.UMI);
-			read = Utils.nextRead(br);
-		}
-		br.close();
-		
-		System.out.println(Parameters.nbReads + " reads were processed from fastq file [" + Utils.toReadableTime(System.currentTimeMillis() - start) + "]");
-		
-		BufferedWriter bw = new BufferedWriter(new FileWriter(Parameters.tmpFolder + "fastq."+Parameters.nbTmpFastq+".tmp"));
-		for(String l:lines) bw.write(l + "\n");
-		bw.close();
-		
-		System.out.println("Created " + Parameters.nbTmpFastq + " temporary fastq files");
-		
-		System.out.println(noBarcodeMatch + " reads have no matching barcodes (" + Parameters.pcFormatter.format(((float)noBarcodeMatch / Parameters.nbReads) * 100) + "%)");
-	}
-	
 	/**
 	 * Using Picard to read the reads from the BAM file created by the alignment tool
 	 * @throws Exception Yes I know...
@@ -74,6 +27,7 @@ public class DGEMatrixManager
 		SamReaderFactory samReaderFactory = SamReaderFactory.makeDefault().validationStringency(ValidationStringency.SILENT);
 		SamReader samReader = samReaderFactory.open(Parameters.inputBAMFileR2);
 		SAMRecordIterator it = samReader.iterator();
+		HashSet<String> uniqueGenes = new HashSet<String>();
 		// Start reading the BAM file
 		TreeSet<String> lines = new TreeSet<String>();
 		Parameters.nbReads = 0;
@@ -87,15 +41,26 @@ public class DGEMatrixManager
 		while(it.hasNext())
 		{
 			SAMRecord samRecord = it.next();
+			Parameters.nbReads++;
+			
 			if(samRecord.getSupplementaryAlignmentFlag())
 			{
 				Parameters.notUnique++;
 				lines.add(samRecord.getReadName() + "\t__alignment_not_unique");
 			}
-			else if(!samRecord.getReadUnmappedFlag())
+			else if(samRecord.getReadUnmappedFlag())
 			{
-				Parameters.nbReads++;
-				HashSet<String> overlappingGenes = getOverlappingGenes(samRecord.getReferenceName(), samRecord.getAlignmentStart(), samRecord.getAlignmentEnd(), samRecord.getCigar());
+				Parameters.unmapped++;
+				lines.add(samRecord.getReadName() + "\t__not_aligned");
+			}
+			else if(samRecord.getMappingQuality() < 10)
+			{
+				Parameters.toolowAqual++;
+				lines.add(samRecord.getReadName() + "\t__too_low_aQual");
+			}
+			else
+			{
+				HashSet<String> overlappingGenes = Utils.getOverlappingGenes(samRecord.getReferenceName(), samRecord.getAlignmentStart(), samRecord.getAlignmentEnd(), samRecord.getCigar(), samRecord.getReadNegativeStrandFlag());
 				if(overlappingGenes.size() == 0)
 				{
 					Parameters.noFeature++;
@@ -104,7 +69,9 @@ public class DGEMatrixManager
 				else if(overlappingGenes.size() == 1)	
 				{
 					Parameters.mapped++;
-					lines.add(samRecord.getReadName() + "\t" + overlappingGenes.iterator().next());
+					String gene = overlappingGenes.iterator().next();
+					uniqueGenes.add(gene);
+					lines.add(samRecord.getReadName() + "\t" + gene);
 				}
 				else
 				{
@@ -112,80 +79,28 @@ public class DGEMatrixManager
 					lines.add(samRecord.getReadName() + "\t__ambiguous");
 				}
 			} 
-			else 
-			{
-				Parameters.unmapped++;
-				lines.add(samRecord.getReadName() + "\t__not_aligned");
-			}
+
 			if(Parameters.nbReads %Parameters.chunkSize == 0) 
 			{
-				BufferedWriter bw = new BufferedWriter(new FileWriter(Parameters.tmpFolder + "bam."+Parameters.nbTmpBAM+".tmp"));
-				for(String l:lines) bw.write(l + "\n");
-				bw.close();
+				TmpFileManager.createTmpFile(Parameters.tmpFolder + "bam."+Parameters.nbTmpBAM+".tmp", lines);
 				Parameters.nbTmpBAM++;
 				lines = new TreeSet<String>();
 				System.out.println(Parameters.nbReads + " reads were processed from BAM file [" + Utils.toReadableTime(System.currentTimeMillis() - start) + "]");
 			}
 		}
 		samReader.close();
-		
+			
+		TmpFileManager.createTmpFile(Parameters.tmpFolder + "bam."+Parameters.nbTmpBAM+".tmp", lines);
 		System.out.println(Parameters.nbReads + " reads were processed from BAM file [" + Utils.toReadableTime(System.currentTimeMillis() - start) + "]");
-		
-		BufferedWriter bw = new BufferedWriter(new FileWriter(Parameters.tmpFolder + "bam."+Parameters.nbTmpBAM+".tmp"));
-		for(String l:lines) bw.write(l + "\n");
-		bw.close();
 		System.out.println("Created " + Parameters.nbTmpBAM + " temporary BAM files");
 		
+		System.out.println(uniqueGenes.size() + " Unique genes were detected (at least one read).");
 		System.out.println(Parameters.mapped + " 'Mapped' reads (" + Parameters.pcFormatter.format(((float)Parameters.mapped / Parameters.nbReads) * 100) + "%)");
 		System.out.println(Parameters.ambiguous + " 'Ambiguous' reads (" + Parameters.pcFormatter.format(((float)Parameters.ambiguous / Parameters.nbReads) * 100) + "%)");
 		System.out.println(Parameters.noFeature + " 'No Features' reads (" + Parameters.pcFormatter.format(((float)Parameters.noFeature / Parameters.nbReads) * 100) + "%)");
 		System.out.println(Parameters.notUnique + " 'Not Unique' reads (" + Parameters.pcFormatter.format(((float)Parameters.notUnique / Parameters.nbReads) * 100) + "%)");
 		System.out.println(Parameters.unmapped + " 'Not Aligned' reads (" + Parameters.pcFormatter.format(((float)Parameters.unmapped / Parameters.nbReads) * 100) + "%)");
 		System.out.println(Parameters.toolowAqual + " 'Too Low aQual' reads (" + Parameters.pcFormatter.format(((float)Parameters.toolowAqual / Parameters.nbReads) * 100) + "%)");
-	}
-	
-	private static HashSet<String> getOverlappingGenes(String chr, int start, int end, Cigar c) throws Exception
-	{
-		HashSet<String> res = new HashSet<>();
-		List<CigarElement> l = c.getCigarElements();
-		int s = start;
-		for(CigarElement cigar:l)
-		{
-			switch(cigar.getOperator())
-			{
-				case M:
-					res.addAll(GTF.findOverlappingGenes(chr, s, s + cigar.getLength()));
-					s += cigar.getLength();
-					break;
-				case N:
-					s += cigar.getLength();
-					break;
-				case D:
-					s += cigar.getLength();
-					break;
-				case EQ:
-					System.out.println("CIGAR = " + c);
-					return new HashSet<>(); // TODO
-				case H:
-					System.out.println("CIGAR = " + c);
-					return new HashSet<>(); // TODO
-				case I:
-					// Do nothing
-					break;
-				case P:
-					System.out.println("CIGAR = " + c);
-					return new HashSet<>(); // TODO
-				case S:
-					// Do nothing (alignment start is after any S & alignment end before any S)
-					break;
-				case X:
-					System.out.println("CIGAR = " + c);
-					return new HashSet<>(); // TODO
-			}
-		}
-		
-		if(s != end + 1) throw new Exception("Error while reading CIGAR");
-		return res;
 	}
 	
 	/**
@@ -206,13 +121,13 @@ public class DGEMatrixManager
 		Read r_fq = fm_fastq.getFirstRead();
 		while(r_fq != null)
 		{
-			Read r_bam = fm_bam.getRead(r_fq.name);
+			Read r_bam = fm_bam.getReadB(r_fq.name);
 			if(r_bam != null) 
 			{
 				int x = Parameters.barcodeIndex.get(r_fq.barcode);
 				int y = Parameters.geneIndex.get(r_bam.gene);
 				counts[x][y]++;
-				umis[x][y].umis.add(r_fq.UMI);
+				umis[x][y].addUMI(r_fq.UMI); //TODO take into account UMI mismatches
 			}
 			r_fq = fm_fastq.getFirstRead();
 		}

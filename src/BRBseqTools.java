@@ -27,7 +27,7 @@ public class BRBseqTools
 			switch(args[0])
 			{
 				case "CreateDGEMatrix":
-					System.out.println("BRBSeqTools [CreateDGEMatrix]\n");
+					System.out.println("BRBSeqTools 1.1 [CreateDGEMatrix]\n");
 					Parameters.loadDGE(argsParsed);
 					Parameters.barcodes = Utils.readConfig();
 					Parameters.BC1 = new ArrayList<String>();
@@ -37,12 +37,30 @@ public class BRBseqTools
 					Parameters.barcodeIndex.put("Unknown", Parameters.barcodeIndex.size());
 					Utils.patterning();
 					GTF.readGTF();
-					DGEMatrixManager.readR1Fastq();
+					Utils.readR1Fastq(false);
 					DGEMatrixManager.readR2BAM();
 					DGEMatrixManager.createOutputDGE();
 					break;
+				case "AnnotateBAM":
+					System.out.println("BRBSeqTools 1.1 [AnnotateBAM]\n");
+					Parameters.loadAnnoBAM(argsParsed);
+					if(Parameters.inputConfigFile != null)
+					{
+						Parameters.barcodes = Utils.readConfig();
+						Parameters.BC1 = new ArrayList<String>();
+						Parameters.barcodeIndex = new HashMap<String, Integer>();
+						for(String B1:Parameters.barcodes) Parameters.BC1.add(B1);
+						for(int i = 0; i < Parameters.BC1.size(); i++) Parameters.barcodeIndex.put(Parameters.BC1.get(i), i);
+						Parameters.barcodeIndex.put("Unknown", Parameters.barcodeIndex.size());
+					}
+					Utils.patterning();
+					if(Parameters.inputGTFFile != null) GTF.readGTF();
+					Utils.readR1Fastq(true);
+					AnnotateBAMManager.readR2BAM();
+					AnnotateBAMManager.annotate();
+					break;
 				case "Demultiplex":
-					System.out.println("BRBSeqTools [Demultiplex]\n");
+					System.out.println("BRBSeqTools 1.1 [Demultiplex]\n");
 					Parameters.loadDemultiplex(argsParsed);
 					Parameters.barcodes = Utils.readConfig();
 					Parameters.BC1 = new ArrayList<String>();
@@ -54,7 +72,7 @@ public class BRBseqTools
 					DemultiplexingManager.demultiplex();
 					break;
 				case "Trim":
-					System.out.println("BRBSeqTools [Trim]\n");
+					System.out.println("BRBSeqTools 1.1 [Trim]\n");
 					Parameters.loadTrim(argsParsed);
 					BufferedWriter bw_excel = new BufferedWriter(new FileWriter(Parameters.outputFolder + "brbseq.trimming.output.txt"));
 					bw_excel.write("sample\tnbReads\tnbRemaininingReads\tnbContaminated\tnbPolyATrimmed\tnbRemoved\tnbPolyABefore\n");
@@ -70,7 +88,7 @@ public class BRBseqTools
 					bw_excel.close();
 					break;
 				default:
-					System.err.println("This method is not implemented. Please use one of the following: [CreateDGEMatrix, Demultiplex, Trim].");
+					System.err.println("This method is not implemented. Please use one of the following: [CreateDGEMatrix, AnnotateBAM, Demultiplex, Trim].");
 					Parameters.printHelp();
 			}
 		}

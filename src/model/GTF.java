@@ -37,6 +37,7 @@ public class GTF
 				String gene_id = null;
 				String chr = tokens[0];
 				String type = tokens[2];
+				boolean strand = tokens[6].equals("+");
 				for(String param:params) 
 				{
 					String value = param.substring(param.indexOf("\"")+1, param.lastIndexOf("\""));
@@ -51,7 +52,7 @@ public class GTF
 					IntervalTree tree = forest.get(chr);
 					if(tree == null) tree = new IntervalTree();
 					uniqueGeneId.add(gene_id);
-					tree.insert(new IntervalLabelled((int)start, (int)end, gene_id));
+					tree.insert(new IntervalLabelled((int)start, (int)end, gene_id, strand));
 					forest.put(chr, tree);
 				}
 				else if(type.equals("gene"))
@@ -74,14 +75,20 @@ public class GTF
 		System.out.println(nbExons + " 'exons' are annotating " + uniqueGeneId.size() + " unique genes in the provided GTF file. In total " + nbGenes + " 'gene' annotations are found in the GTF file.");
 	}
 	
-	public static HashSet<String> findOverlappingGenes(String chr, int start, int end)
+	public static HashSet<String> findOverlappingGenes(String chr, int start, int end, boolean readNegativeStrandFlag)
 	{
 		HashSet<String> result = new HashSet<>();
 		IntervalTree itree = forest.get(chr);
 		if(itree != null)
 		{
 			List<Interval> found = itree.findOverlapping(new Interval(start, end));
-			for(Interval i:found) result.add(((IntervalLabelled)i).gene);
+			for(Interval i:found) 
+			{
+				IntervalLabelled g = (IntervalLabelled)i;
+				if(Parameters.stranded == Strand.NO) result.add(g.gene);
+				else if(Parameters.stranded == Strand.REVERSE && g.readNegativeStrandFlag == readNegativeStrandFlag) result.add(g.gene);
+				else if(Parameters.stranded == Strand.YES && g.readNegativeStrandFlag != readNegativeStrandFlag) result.add(g.gene);
+			}
 		}
 		return result;
 	}

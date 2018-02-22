@@ -3,12 +3,17 @@ package model;
 import java.io.BufferedWriter;
 import java.io.IOException;
 
+import htsjdk.samtools.SAMRecord;
+
 public class Read implements Comparable<Read>
 {
 	public String name;
 	public String barcode;
+	public String qualityBC;
 	public String UMI;
+	public String qualityUMI;
 	public String gene;
+	public SAMRecord samRecord;
 	public String[] rawData; // 4 lines
 	public boolean barcodeMatch = false;
 	
