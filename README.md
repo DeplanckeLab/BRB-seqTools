@@ -55,9 +55,9 @@ This tool is used when you need to generate all the fastq files corresponding to
 
 Options:
 ```
--r1 %s          Path of R1 FastQ files (containing barcode and optionally UMIs) [can be gzipped or raw].
--r2 %s          Path of R2 FastQ files (containing read sequence) [can be gzipped or raw].
--c %s           Path of Barcode/Samplename mapping file¹.
+-r1 %s          [Required] Path of R1 FastQ files (containing barcode and optionally UMIs) [can be gzipped or raw].
+-r2 %s          [Required] Path of R2 FastQ files (containing read sequence) [can be gzipped or raw].
+-c %s           [Required] Path of Barcode/Samplename mapping file¹.
 -n %i           Number of allowed difference with the barcode [Default = 1]. Ambiguous barcodes (same distance from two or more existing barcodes) will be automatically discarded.
 -o %s           Output folder
 -p %s           Barcode pattern/order found in the reads of the R1 FastQ file. Barcode names should match the barcode file (default = 'BU' i.e. barcode followed by the UMI).
@@ -86,10 +86,10 @@ It greatly simplifies the demultiplexing and analysis, and directly generates a 
 
 Options:
 ```
--f %s           Path of R1 FastQ file [can be gzipped or raw].
--b %s           Path of R2 aligned BAM file [do not need to be sorted or indexed].
--c %s           Path of Barcode/Samplename mapping file¹.
--gtf %s         Path of GTF file [can be gzipped or raw].
+-f %s           [Required] Path of R1 FastQ file [can be gzipped or raw].
+-b %s           [Required] Path of R2 aligned BAM file [do not need to be sorted or indexed].
+-c %s           [Required] Path of Barcode/Samplename mapping file¹.
+-gtf %s         [Required] Path of GTF file [can be gzipped or raw].
 -s %s           Do you want to count only reads falling on same strand than gene? [no, yes, reverse] (default = yes since BRB-seq is stranded protocol)
 -n %i           Number of allowed difference with the barcode [ambiguous reads will be automatically discarded].
 -o %s           Output folder
@@ -147,7 +147,7 @@ It can also be used to trim individually all the demultiplexed .fastq files if y
 
 Options:
 ```
--f %s           Path of FastQ file to trim (or containing folder for processing all fastq files at once).
+-f %s           [Required] Path of FastQ file to trim (or containing folder for processing all fastq files at once).
 -o %s           Output folder
 -uniqueBarcode  If the fastq file(s) contain(s) only one barcode (for e.g. after demultiplexing), this option can be used for searching the specific barcode (most occuring) in the construct and trimming it when present.
 -polyA %i       Trim polyA strings that have more than this length (without mismatch), and all 3' string that follows [default=6]
