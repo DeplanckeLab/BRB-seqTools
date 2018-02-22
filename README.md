@@ -50,7 +50,7 @@ Trim            For trimming BRBseq construct in R2 fastq file or demultiplexed 
 AnnotateBAM     For annotating the R2 BAM file using UMIs/Barcodes from the R1 fastq and/or GTF and/or Barcode files
 ```
 
-### Demultiplex ![](https://img.shields.io/badge/Tool-Demultiplex-blue.svg)
+### Demultiplex
 This tool is used when you need to generate all the fastq files corresponding to all your multiplexed samples. You end up with one fastq file per sample.
 
 Options:
@@ -80,7 +80,7 @@ java -jar BRBseqTools.1.1.jar Demultiplex -r1 lib_example_R1.fastq.gz -r2 lib_ex
 
 > **Note:** When using this tool, UMIs are kept as indexes in all output .fastq files
 
-### CreateDGEMatrix ![](https://img.shields.io/badge/Tool-CreateDGEMatrix-blue.svg)
+### CreateDGEMatrix
 This tool is used when you don't need the intermediary .fastq & .bam files from all your multiplexed samples.
 It greatly simplifies the demultiplexing and analysis, and directly generates a workable count/UMI matrix.
 
@@ -111,7 +111,7 @@ java -jar BRBseqTools.1.1.jar CreateDGEMatrix -f lib_example_R1.fastq.gz -b lib_
 
 > **Note:** The original BRB-seq protocol contains a UMI construct. But you can also generate a library without UMIs, or even not sequence the UMIs from R2 read. If UMIs are present, both UMI and read count matrices will be generated. If not, only the read count table will be generated.
 
-### AnnotateBAM ![](https://img.shields.io/badge/Tool-AnnotateBAM-blue.svg)
+### AnnotateBAM
 This tool is used when you need specific downstream analyses of your BAM files that are not handled by BRBseqTools. It creates an annotated BAM file containing the UMI/Barcodes and can also have annotated genes information. For example, it allows you to use pipelines such as Picard MarkDuplicates, that can use the UMI/Barcode information for better quantifying the duplicated reads (Picard options BARCODE_TAG=BC READ_ONE_BARCODE_TAG=BX)
 
 Options:
@@ -141,9 +141,9 @@ java -jar BRBseqTools.1.1.jar AnnotateBAM -f lib_example_R1.fastq.gz -b lib_exam
 
 > **Note:** Most of the options are optionals here. If not put, then the corresponding tag will simply not be added to the annotated BAM.
 
-### Trim ![](https://img.shields.io/badge/Tool-Trim-blue.svg)
+### Trim
 This tool is used to trim the BRB-seq construct & the polyA sequences from the R2 fastq file.
-It can also be used to trim all the demultiplexed .fastq files after the ![](https://img.shields.io/badge/Tool-Demultiplex-blue.svg) step (in this case, use the -uniqueBarcode option)
+It can also be used to trim individually all the demultiplexed .fastq files if you used the "Demultiplex" tool (in this case, use the -uniqueBarcode option)
 
 Options:
 ```
