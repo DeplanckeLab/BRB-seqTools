@@ -1,0 +1,39 @@
+java -jar BRBseqTools.1.1.jar -f lib_example_R1.fastq.gz -b lib_example_R2.bam -p BU -UMI 14 -c lib_example_barcodes.txt -o AnnotateBAM/ -gtf Homo_sapiens.GRCh38.90.gtf.gz
+
+BRBSeqTools 1.1 [AnnotateBAM]
+
+Output folder does not exist. Creating it
+A barcode mapping file was specified, barcodes will be annotated as in R1 (with mismatch correction) or 'Unknown' if not mapping to any barcode.
+Nb Allowed Diff = 1
+A GTF file was specified using the '-gtf' option. Output annotated BAM will contain annotated gene with 'CO' TAG
+Stranded = YES
+Barcode Pattern = BU
+ChunkSize = 1000000 i.e. no more than 1000000 reads will be stored in RAM.
+No folder for temporary generated files is specified, using output folder as default: "D:/GitHub/BRB-seq_Tools/examples/AnnotateBAM/". You can specify a temporary folder by using the '-t' option.
+Config: B1 contains 4 barcodes: [ GACGGG GTCAAG ATGTAA CCACGC ]
+Config: B1 length [#nucleotides] = 6
+
+Analyzing barcode Pattern...
+According to barcode pattern, reads of R1 FastQ file should contain 20 characters.
+
+Reading GTF file provided: Homo_sapiens.GRCh38.90.gtf.gz
+1199851 'exons' are annotating 58302 unique genes in the provided GTF file. In total 58302 'gene' annotations are found in the GTF file.
+
+Reading reads barcodes/UMI from the R1 fastq file...
+100000 reads were processed from fastq file [239 ms]
+Created 1 temporary fastq files
+1930 reads have no matching barcodes (1.93%)
+
+Reading the reads from the BAM file...
+78224 reads were processed from BAM file [1 s 214 ms]
+Created 1 temporary BAM files
+8791 Unique genes were detected (at least one read).
+69453 'Mapped' reads (88.79%)
+1335 'Ambiguous' reads (1.71%)
+7436 'No Features' reads (9.51%)
+0 'Not Unique' reads (0%)
+0 'Not Aligned' reads (0%)
+0 'Too Low aQual' reads (0%)
+
+Starting annotation of BAM...
+78224 reads were written in annotated BAM file [1 s 23 ms]
