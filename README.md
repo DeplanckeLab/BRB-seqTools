@@ -35,10 +35,6 @@ After sequencing your BRB-seq libraries, you should obtain two fastq files per l
 BRB-seq tools is a suite dedicated to help you analyze these data, until the generation of the output count/UMI matrix.
 For further analyses (filtering, normalization, dimension reduction, clustering, differential expression), we recommend using [ASAP web portal](https://www.ncbi.nlm.nih.gov/pubmed/28541377) that you can freely access at [asap.epfl.ch](https://asap.epfl.ch).
 
-You have two options depending on what you aim to do with your RNA-seq data:
-* ![](https://img.shields.io/badge/Tool-Demultiplex-blue.svg) Perform demultiplexing before aligning your data to the reference genome. This option will generate one fastq file per sample. Every fastq file can then be aligned and processed independently with standard RNA-seq pipelines.
-* ![](https://img.shields.io/badge/Tool-CreateDGEMatrix-blue.svg) Align the R2 file and demultiplex after alignment. This option allow you to perform only one alignment on the whole R2 fastq file. This will generate one BAM file (no need to be sorted) with all your samples in it. Then 'BRB-seq tools' suite can be used to generate the read and UMI count matrices from the R2 BAM and the R1 fastq files.
-
 ### Installation
 To check that BRB-seq Tools is working properly, run the following command:
 
