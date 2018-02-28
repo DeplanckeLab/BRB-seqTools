@@ -216,7 +216,7 @@ public class Utils
 			switch(cigar.getOperator())
 			{
 				case M:
-					res.addAll(GTF.findOverlappingGenes(chr, s, s + cigar.getLength(), readNegativeStrandFlag));
+					res.addAll(GTF.findOverlappingGenes(chr, s, s + cigar.getLength() - 1, readNegativeStrandFlag)); // -1 Because the last letter is at the index before
 					s += cigar.getLength();
 					break;
 				case N:
