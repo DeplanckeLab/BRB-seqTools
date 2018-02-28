@@ -9,7 +9,7 @@ A GTF file was specified using the '-gtf' option. Output annotated BAM will cont
 Stranded = YES
 Barcode Pattern = BU
 ChunkSize = 1000000 i.e. no more than 1000000 reads will be stored in RAM.
-No folder for temporary generated files is specified, using output folder as default: "D:/GitHub/BRB-seq_Tools/examples/AnnotateBAM/". You can specify a temporary folder by using the '-t' option.
+No folder for temporary generated files is specified, using output folder as default: "AnnotateBAM/". You can specify a temporary folder by using the '-t' option.
 Config: B1 contains 4 barcodes: [ GACGGG GTCAAG ATGTAA CCACGC ]
 Config: B1 length [#nucleotides] = 6
 
