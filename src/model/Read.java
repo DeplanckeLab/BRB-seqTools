@@ -14,6 +14,8 @@ public class Read implements Comparable<Read>
 	public String qualityUMI;
 	public String gene;
 	public SAMRecord samRecord;
+	public String start;
+	public String end;
 	public String[] rawData; // 4 lines
 	public boolean barcodeMatch = false;
 	

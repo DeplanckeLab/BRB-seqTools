@@ -43,20 +43,22 @@ public class DGEMatrixManager
 			SAMRecord samRecord = it.next();
 			Parameters.nbReads++;
 			
+			String toAdd = samRecord.getReadName();
+			
 			if(samRecord.getSupplementaryAlignmentFlag())
 			{
 				Parameters.notUnique++;
-				lines.add(samRecord.getReadName() + "\t__alignment_not_unique");
+				toAdd += "\t__alignment_not_unique\t";
 			}
 			else if(samRecord.getReadUnmappedFlag())
 			{
 				Parameters.unmapped++;
-				lines.add(samRecord.getReadName() + "\t__not_aligned");
+				toAdd += "\t__not_aligned\t";
 			}
 			else if(samRecord.getMappingQuality() < 10)
 			{
 				Parameters.toolowAqual++;
-				lines.add(samRecord.getReadName() + "\t__too_low_aQual");
+				toAdd += "\t__too_low_aQual\t";
 			}
 			else
 			{
@@ -64,21 +66,22 @@ public class DGEMatrixManager
 				if(overlappingGenes.size() == 0)
 				{
 					Parameters.noFeature++;
-					lines.add(samRecord.getReadName() + "\t__no_feature");
+					toAdd += "\t__no_feature\t";
 				} 
 				else if(overlappingGenes.size() == 1)	
 				{
 					Parameters.mapped++;
 					String gene = overlappingGenes.iterator().next();
 					uniqueGenes.add(gene);
-					lines.add(samRecord.getReadName() + "\t" + gene);
+					toAdd += "\t" + gene+ "\t";
 				}
 				else
 				{
 					Parameters.ambiguous++;
-					lines.add(samRecord.getReadName() + "\t__ambiguous");
+					toAdd += "\t__ambiguous\t";
 				}
-			} 
+			}
+			lines.add(toAdd + samRecord.getAlignmentStart() + "\t" + samRecord.getAlignmentEnd());
 
 			if(Parameters.nbReads %Parameters.chunkSize == 0) 
 			{
@@ -118,23 +121,33 @@ public class DGEMatrixManager
 		UMI[][] umis = new UMI[Parameters.barcodeIndex.size()][Parameters.geneIndex.size()]; // Sample / gene
 		for(int i = 0; i < umis.length; i++) for(int j = 0; j < umis[i].length; j++) umis[i][j] = new UMI();
 		
+		int nbReadsWritten = 0;
+		int lastWritten = nbReadsWritten; // For not writing twice the same line [Mehhhh]
+		
 		Read r_fq = fm_fastq.getFirstRead();
 		while(r_fq != null)
 		{
 			Read r_bam = fm_bam.getReadB(r_fq.name);
 			if(r_bam != null) 
 			{
+				nbReadsWritten++;
 				int x = Parameters.barcodeIndex.get(r_fq.barcode);
 				int y = Parameters.geneIndex.get(r_bam.gene);
 				counts[x][y]++;
-				umis[x][y].addUMI(r_fq.UMI); //TODO take into account UMI mismatches
+				umis[x][y].addUMI(r_fq.UMI + ":" + r_bam.start + ":" + r_bam.end);
 			}
 			r_fq = fm_fastq.getFirstRead();
+			if(nbReadsWritten %Parameters.chunkSize == 0 && lastWritten != nbReadsWritten) 
+			{
+				lastWritten = nbReadsWritten;
+				System.out.println(nbReadsWritten + " reads were demultiplexed [" + Utils.toReadableTime(System.currentTimeMillis() - start) + "]");
+			}
 		}
 
 		// Clean tmp files
 		TmpFileManager.delete("fastq", Parameters.nbTmpFastq);
 		TmpFileManager.delete("bam", Parameters.nbTmpBAM);
+		System.out.println(nbReadsWritten + " reads were demultiplexed [" + Utils.toReadableTime(System.currentTimeMillis() - start) + "]\n");
 		
 		// Create the read count and transcript count matrices
 		BufferedWriter bw_reads = new BufferedWriter(new FileWriter(Parameters.outputFolder + "output.dge.reads.txt"));
@@ -163,7 +176,9 @@ public class DGEMatrixManager
 			bw_umis_detailed.write("\n");
 		}
 		
+		System.out.println("\nStarting writing output file (" + ((Parameters.hammingDistanceUMI == 0)?"without sequencing error correction":"with sequencing error correction: hamming distance <= " + Parameters.hammingDistanceUMI) + ")...");
 		String[] sortedKeys = Utils.sortKeys(Parameters.geneIndex);
+		int nbUMIs = 0;
 		for(String gene:sortedKeys)
 		{
 			String mappedGene = Parameters.mappingGeneIdGeneName.get(gene);
@@ -174,17 +189,19 @@ public class DGEMatrixManager
 			for(String barcode:Parameters.barcodeIndex.keySet()) 
 			{
 				String mappedBarcode = Parameters.mappingBarcodeName.get(barcode);
+				nbUMIs += umis[Parameters.barcodeIndex.get(barcode)][Parameters.geneIndex.get(gene)].getCorrectedSize();
 				if(!mappedGene.equals("") && mappedBarcode != null)
 				{
 					bw_reads.write("\t" + counts[Parameters.barcodeIndex.get(barcode)][Parameters.geneIndex.get(gene)]);
-					if(Parameters.UMILength != -1) bw_umis.write("\t" + umis[Parameters.barcodeIndex.get(barcode)][Parameters.geneIndex.get(gene)].umis.size());
+					if(Parameters.UMILength != -1) bw_umis.write("\t" + umis[Parameters.barcodeIndex.get(barcode)][Parameters.geneIndex.get(gene)].getCorrectedSize());
 				}
 				bw_reads_detailed.write("\t" + counts[Parameters.barcodeIndex.get(barcode)][Parameters.geneIndex.get(gene)]);
-				if(Parameters.UMILength != -1) bw_umis_detailed.write("\t" + umis[Parameters.barcodeIndex.get(barcode)][Parameters.geneIndex.get(gene)].umis.size());
+				if(Parameters.UMILength != -1) bw_umis_detailed.write("\t" + umis[Parameters.barcodeIndex.get(barcode)][Parameters.geneIndex.get(gene)].getCorrectedSize());
 			}
 			if(!mappedGene.equals("")) { bw_reads.write("\n"); if(Parameters.UMILength != -1) bw_umis.write("\n"); }
 			bw_reads_detailed.write("\n"); if(Parameters.UMILength != -1) bw_umis_detailed.write("\n");
 		}
+		System.out.println(nbUMIs + " UMI counts were written (" + (nbReadsWritten - nbUMIs) + " duplicates = "+ Parameters.pcFormatter.format(((nbReadsWritten - nbUMIs) / (float)nbReadsWritten)*100) + "%)");
 		bw_reads.close(); bw_reads_detailed.close();
 		if(Parameters.UMILength != -1) { bw_umis.close(); bw_umis_detailed.close();}
 		System.out.println("DGE count & UMI matrices were created [" + Utils.toReadableTime(System.currentTimeMillis() - start) + "]");

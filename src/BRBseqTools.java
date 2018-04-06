@@ -14,7 +14,7 @@ import tools.Utils;
  * @see vincent.gardeux@epfl.ch
  *
  */
-public class BRBseqTools 
+public class BRBseqTools
 {	
 	public static void main(String[] args) throws Exception
 	{
@@ -61,7 +61,7 @@ public class BRBseqTools
 					break;
 				case "Demultiplex":
 					System.out.println("BRBSeqTools 1.1 [Demultiplex]\n");
-					Parameters.loadDemultiplex(argsParsed);
+					Parameters.loadDemultiplex(argsParsed);		
 					Parameters.barcodes = Utils.readConfig();
 					Parameters.BC1 = new ArrayList<String>();
 					Parameters.barcodeIndex = new HashMap<String, Integer>();

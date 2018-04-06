@@ -22,6 +22,7 @@ public class Parameters
 	public static ArrayList<File> fastqToTrim = null;
 	public static String barcodePattern = "BU";
 	public static int nbAllowedDiff = 1;
+	public static int hammingDistanceUMI = 0;
 	public static int UMILength = -1;
 	public static int polyALength = 6;
 	public static int minReadLength = 10;
@@ -269,7 +270,7 @@ public class Parameters
 							System.exit(-1);
 						}
 						break;
-					case "-n":
+					case "-nb":
 						i++;
 						try
 						{
@@ -277,7 +278,19 @@ public class Parameters
 						}
 						catch(NumberFormatException nfe)
 						{
-							System.err.println("The '-n' option should be followed by an Integer. You entered " + args[i]);
+							System.err.println("The '-nb' option should be followed by an Integer. You entered " + args[i]);
+							System.exit(-1);
+						}
+						break;
+					case "-nu":
+						i++;
+						try
+						{
+							hammingDistanceUMI = Integer.parseInt(args[i]);
+						}
+						catch(NumberFormatException nfe)
+						{
+							System.err.println("The '-nu' option should be followed by an Integer. You entered " + args[i]);
 							System.exit(-1);
 						}
 						break;
@@ -416,7 +429,8 @@ public class Parameters
 			System.exit(-1);
 		}
 		System.out.println("Barcode Pattern = " + barcodePattern);
-		System.out.println("Nb Allowed Diff = " + nbAllowedDiff);
+		System.out.println("Maximum allowed Hamming distance for sequencing error correction [Barcode] = " + nbAllowedDiff);
+		if(UMILength != -1) System.out.println("Maximum allowed Hamming distance for sequencing error correction [UMI] = " + hammingDistanceUMI);
 		System.out.println("ChunkSize = " + chunkSize + " i.e. no more than " + chunkSize + " reads will be stored in RAM.");
 		System.out.println("Stranded = " + Parameters.stranded);
 		if(outputFolder == null)
@@ -819,24 +833,25 @@ public class Parameters
 	private static void printHelpDGE()
 	{
 		System.out.println("BRBseq-tools 1.1 [CreateDGEMatrix]\n\nOptions:");
-		System.out.println("-f %s \t\tPath of R1 FastQ file.");
-		System.out.println("-b %s \t\tPath of R2 aligned BAM file [do not need to be sorted or indexed].");
-		System.out.println("-c %s \t\tPath of Barcode/Samplename mapping file.");
-		System.out.println("-gtf %s \tPath of GTF file.");
-		System.out.println("-s %s \t\tDo you want to count only reads falling on same strand than gene? [no, yes, reverse] (default = yes since BRB-seq is stranded protocol).");
-		System.out.println("-n %i \t\tNumber of allowed difference with the barcode [ambiguous reads will be automatically discarded].");
-		System.out.println("-o %s \t\tOutput folder");
-		System.out.println("-t %s \t\tPath of existing folder for storing temporary files");
-		System.out.println("-chunkSize %i\tMaximum number of reads to be stored in RAM (default = 1000000)");
-		System.out.println("-p %s \t\tBarcode pattern/order found in the reads of the R1 FastQ file. Barcode names should match the barcode file (default = 'BU' i.e. barcode followed by the UMI).\n\t\t\t'B' [required] is used for specifying the barcode position.\n\t\t\t'U' [optional] can be used for specifying a UMI value position.\n\t\t\t'?' [optional] can be used to ignore specific nucleotides.");
+		System.out.println("-f %s \t\t[Required] Path of R1 FastQ file.");
+		System.out.println("-b %s \t\t[Required] Path of R2 aligned BAM file [do not need to be sorted or indexed].");
+		System.out.println("-c %s \t\t[Required] Path of Barcode/Samplename mapping file.");
+		System.out.println("-gtf %s \t[Required] Path of GTF file.");
+		System.out.println("-s %s \t\tDo you want to count only reads falling on same strand than gene? [no, yes, reverse] [default = yes, since BRB-seq is stranded protocol].");
+		System.out.println("-nb %i \t\tNumber of allowed difference (hamming distance) with the given barcodes in config file [default = 1].");
+		System.out.println("-nu %i \t\tNumber of allowed difference (hamming distance) for two UMIs to be counted only once [default = 1].");
+		System.out.println("-o %s \t\tOutput folder [default = folder of BAM file]");
+		System.out.println("-t %s \t\tPath of existing folder for storing temporary files [default = folder of BAM file]");
+		System.out.println("-chunkSize %i\tMaximum number of reads to be stored in RAM [default = 1000000]");
+		System.out.println("-p %s \t\tBarcode pattern/order found in the reads of the R1 FastQ file. Barcode names should match the barcode file [default = 'BU', i.e. barcode followed by the UMI].\n\t\t\t'B' [Required] is used for specifying the barcode position.\n\t\t\t'U' can be used for specifying a UMI value position.\n\t\t\t'?' can be used to ignore specific nucleotides.");
 		System.out.println("-UMI %i \tIf your barcode pattern contains UMI ('U'), you should specify this parameter as the length of the UMI.");
 	}
 	
 	private static void printHelpAnnoBAM()
 	{
 		System.out.println("BRBseq-tools 1.1 [AnnotateBAM]\n\nOptions:");
-		System.out.println("-f %s \t\tPath of R1 FastQ file.");
-		System.out.println("-b %s \t\tPath of R2 aligned BAM file [do not need to be sorted or indexed].");
+		System.out.println("-f %s \t\t[Required] Path of R1 FastQ file.");
+		System.out.println("-b %s \t\t[Required] Path of R2 aligned BAM file [do not need to be sorted or indexed].");
 		System.out.println("-c %s \t\tPath of Barcode/Samplename mapping file.");
 		System.out.println("-gtf %s \tPath of GTF file (for UMI counting).");
 		System.out.println("-s %s \t\tDo you want to annotate genes only in case where reads are falling on same strand? [no, yes, reverse] (default = yes since BRB-seq is stranded protocol).");
@@ -851,9 +866,9 @@ public class Parameters
 	private static void printHelpDemultiplex()
 	{
 		System.out.println("BRBseq-tools 1.1 [Demultiplex]\n\nOptions:");
-		System.out.println("-r1 %s \t\tPath of R1 FastQ files (containing barcode and optionally UMIs).");
-		System.out.println("-r2 %s \t\tPath of R2 FastQ files (containing read sequence).");
-		System.out.println("-c %s \t\tPath of Barcode/Samplename mapping file.");
+		System.out.println("-r1 %s \t\t[Required] Path of R1 FastQ files (containing barcode and optionally UMIs).");
+		System.out.println("-r2 %s \t\t[Required] Path of R2 FastQ files (containing read sequence).");
+		System.out.println("-c %s \t\t[Required] Path of Barcode/Samplename mapping file.");
 		System.out.println("-n %i \t\tNumber of allowed difference with the barcode [ambiguous reads will be automatically discarded].");
 		System.out.println("-o %s \t\tOutput folder");
 		System.out.println("-p %s \t\tBarcode pattern/order found in the reads of the R1 FastQ file. Barcode names should match the barcode file (default = 'BU' i.e. barcode followed by the UMI).\n\t\t\t'B' [required] is used for specifying the barcode position.\n\t\t\t'U' [optional] can be used for specifying a UMI value position.\n\t\t\t'?' [optional] can be used to ignore specific nucleotides.");
@@ -863,7 +878,7 @@ public class Parameters
 	private static void printHelpTrim()
 	{
 		System.out.println("BRBseq-tools 1.1 [Trim]\n\nOptions:");
-		System.out.println("-f %s \t\tPath of FastQ file to trim (or containing folder for processing all fastq files recursively).");
+		System.out.println("-f %s \t\t[Required] Path of FastQ file to trim (or containing folder for processing all fastq files recursively).");
 		System.out.println("-o %s \t\tOutput folder");
 		System.out.println("-uniqueBarcode\tIf the fastq file(s) contain(s) only one barcode (for e.g. after demultiplexing), this option can be used for searching the specific barcode (most occuring) in the construct and trimming it when present.");
 		System.out.println("-polyA %i \tTrim polyA strings that have more than this length (without mismatch), and all 3' string that follows [default=6]");

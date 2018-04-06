@@ -1,6 +1,7 @@
 package model;
 
 import java.io.BufferedReader;
+import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.List;
@@ -24,6 +25,7 @@ public class GTF
 		int nbExons = 0;
 		int nbGenes = 0;
 		HashSet<String> uniqueGeneId = new HashSet<String>();
+		ArrayList<String> uniqueGeneName = new ArrayList<String>(); // It's actually not unique and should not be since two geneID can have the same gene Name => ArrayList
 		while(line != null)
 		{
 	    	if(!line.startsWith("#"))
@@ -40,9 +42,10 @@ public class GTF
 				boolean strand = tokens[6].equals("+");
 				for(String param:params) 
 				{
-					String value = param.substring(param.indexOf("\"")+1, param.lastIndexOf("\""));
-					if(param.contains("gene_name")) gene_name = value;
-					if(param.contains("gene_id")) gene_id = value;
+					String[] values = param.trim().split("\\s+");
+					values[1] = values[1].replaceAll("\"", "");
+					if(values[0].equals("gene_name")) gene_name = values[1];
+					else if(values[0].equals("gene_id")) gene_id = values[1];
 				}
 				if(gene_name == null) gene_name = gene_id;
 				// Which type is it?
@@ -51,7 +54,7 @@ public class GTF
 					nbExons++;
 					IntervalTree tree = forest.get(chr);
 					if(tree == null) tree = new IntervalTree();
-					uniqueGeneId.add(gene_id);
+					if(uniqueGeneId.add(gene_id)) uniqueGeneName.add(gene_name);
 					tree.insert(new IntervalLabelled((int)start, (int)end, gene_id, strand));
 					forest.put(chr, tree);
 				}
@@ -66,13 +69,28 @@ public class GTF
 		}
 		br.close();
 		
+		if(nbGenes == 0) {
+			System.out.println("No Genes were detected in the GTF file. Probably the \"gene\" annotation is missing from the GTF file 3rd column?");
+			System.out.println("Trying to \"save the day\" by collapsing exons to their annotated gene_id");
+			for(String gene_id:uniqueGeneId) {
+				Parameters.geneIndex.put(gene_id, nbGenes);
+				Parameters.mappingGeneIdGeneName.put(gene_id, uniqueGeneName.get(nbGenes));
+				nbGenes++;
+			}
+		}
+
+		System.out.println(nbExons + " 'exons' are annotating " + uniqueGeneId.size() + " unique genes in the provided GTF file. In total " + nbGenes + " 'gene' annotations are found in the GTF file.");
+		
+		if(nbGenes == 0) {
+			System.err.println("We couldn't parse the GTF file. Please report this problem if the GTF is in standard format. Or use another GTF from another source.");
+			System.exit(-1);
+		}
+		
 		Parameters.geneIndex.put("__alignment_not_unique", Parameters.geneIndex.size());
 		Parameters.geneIndex.put("__no_feature", Parameters.geneIndex.size());
 		Parameters.geneIndex.put("__ambiguous", Parameters.geneIndex.size());
 		Parameters.geneIndex.put("__too_low_aQual", Parameters.geneIndex.size());
 		Parameters.geneIndex.put("__not_aligned", Parameters.geneIndex.size());
-		
-		System.out.println(nbExons + " 'exons' are annotating " + uniqueGeneId.size() + " unique genes in the provided GTF file. In total " + nbGenes + " 'gene' annotations are found in the GTF file.");
 	}
 	
 	public static HashSet<String> findOverlappingGenes(String chr, int start, int end, boolean readNegativeStrandFlag)

@@ -147,7 +147,7 @@ public class AnnotateBAMManager
 				}
 				if(Parameters.UMILength != -1)
 				{
-					r_bam.samRecord.setAttribute("BX", r_fq.UMI);
+					r_bam.samRecord.setAttribute("BX", r_fq.UMI); // BX or Maybe should be RX since UMI is not corrected
 					r_bam.samRecord.setAttribute("QX", r_fq.qualityUMI);
 				}
 				samWriter.addAlignment(r_bam.samRecord);

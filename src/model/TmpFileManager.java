@@ -83,6 +83,8 @@ public class TmpFileManager
 		{
 		case "bam":
 			r.gene = tokens[1];
+			r.start = tokens[2];
+			r.end = tokens[3];
 			break;
 		case "fastq":
 			r.barcode = tokens[1];

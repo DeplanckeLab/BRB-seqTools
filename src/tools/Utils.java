@@ -311,7 +311,11 @@ public class Utils
 			System.err.println("B1 column not found in Config file (Required).");
 			System.exit(-1);
 		}
-		if(indexes[1] == -1) System.out.println("Name column not found in Config file (Optional).");
+		if(indexes[1] == -1)
+		{
+			System.err.println("Name column not found in Config file (Required).");
+			System.exit(-1);
+		}
 		line = br.readLine();
 		while(line != null)
 		{
