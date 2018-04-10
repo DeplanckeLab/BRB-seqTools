@@ -142,8 +142,9 @@ java -jar BRBseqTools.1.2.jar AnnotateBAM -f lib_example_R1.fastq.gz -b lib_exam
 > **Note:** Most of the options are optionals here. If not put, then the corresponding tag will simply not be added to the annotated BAM.
 
 ### Trim
-This tool is used to trim the BRB-seq construct & the polyA sequences from the R2 fastq file.
-It can also be used to trim individually all the demultiplexed .fastq files if you used the "Demultiplex" tool (in this case, use the -uniqueBarcode option)
+This tool is used to trim the BRB-seq construct (SMART oligo + Barcode + UMI) & the polyA sequences from the R2 fastq file.
+It can also be used to trim individually all the demultiplexed .fastq files if you used the "Demultiplex" tool (in this case, use the -uniqueBarcode option).
+The tool will TRIM the reads (i.e. cut the construct from the read, and write the remaining of the read). Some reads may not be written in case the remaining of the reads is below the minimum allowed length (-minLength option).
 
 Options:
 ```
