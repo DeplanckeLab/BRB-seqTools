@@ -16,6 +16,8 @@ import tools.Utils;
  */
 public class BRBseqTools
 {	
+	// TODO Gérer les TMP files si meme folder
+	// TODO Bug avec Tophat? Multiple Mapping?
 	public static void main(String[] args) throws Exception
 	{
 		if(args.length < 1) Parameters.printHelp();
@@ -27,7 +29,7 @@ public class BRBseqTools
 			switch(args[0])
 			{
 				case "CreateDGEMatrix":
-					System.out.println("BRBSeqTools 1.1 [CreateDGEMatrix]\n");
+					System.out.println("BRBSeqTools 1.2 [CreateDGEMatrix]\n");
 					Parameters.loadDGE(argsParsed);
 					Parameters.barcodes = Utils.readConfig();
 					Parameters.BC1 = new ArrayList<String>();
@@ -42,7 +44,7 @@ public class BRBseqTools
 					DGEMatrixManager.createOutputDGE();
 					break;
 				case "AnnotateBAM":
-					System.out.println("BRBSeqTools 1.1 [AnnotateBAM]\n");
+					System.out.println("BRBSeqTools 1.2 [AnnotateBAM]\n");
 					Parameters.loadAnnoBAM(argsParsed);
 					if(Parameters.inputConfigFile != null)
 					{
@@ -60,7 +62,7 @@ public class BRBseqTools
 					AnnotateBAMManager.annotate();
 					break;
 				case "Demultiplex":
-					System.out.println("BRBSeqTools 1.1 [Demultiplex]\n");
+					System.out.println("BRBSeqTools 1.2 [Demultiplex]\n");
 					Parameters.loadDemultiplex(argsParsed);		
 					Parameters.barcodes = Utils.readConfig();
 					Parameters.BC1 = new ArrayList<String>();
@@ -72,7 +74,7 @@ public class BRBseqTools
 					DemultiplexingManager.demultiplex();
 					break;
 				case "Trim":
-					System.out.println("BRBSeqTools 1.1 [Trim]\n");
+					System.out.println("BRBSeqTools 1.2 [Trim]\n");
 					Parameters.loadTrim(argsParsed);
 					BufferedWriter bw_excel = new BufferedWriter(new FileWriter(Parameters.outputFolder + "brbseq.trimming.output.txt"));
 					bw_excel.write("sample\tnbReads\tnbRemaininingReads\tnbContaminated\tnbPolyATrimmed\tnbRemoved\tnbPolyABefore\n");

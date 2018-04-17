@@ -26,7 +26,7 @@ public class TmpFileManager
 	private HashMap<String, BufferedReader> whichReader = new HashMap<String, BufferedReader>();
 	private ArrayList<SamReader> samReaders = new ArrayList<SamReader>();
 	private HashMap<String, SAMRecordIterator> whichReaderSAM = new HashMap<String, SAMRecordIterator>();
-	
+		
 	public TmpFileManager(String type, int nbTmp) throws Exception
 	{
 		switch(type)
@@ -67,6 +67,7 @@ public class TmpFileManager
 	public static void createTmpFileB(SAMFileHeader header, String filename, TreeSet<ComparableBAMRecord> lines) throws IOException
 	{
 		SAMFileWriterFactory samWriterFactory = new SAMFileWriterFactory();
+		header.setSortOrder(SAMFileHeader.SortOrder.unsorted);
 		SAMFileWriter samWriter = samWriterFactory.makeBAMWriter(header, true, new File(filename));
 		for(ComparableBAMRecord l:lines) samWriter.addAlignment(l.record);
 		samWriter.close();
@@ -98,7 +99,7 @@ public class TmpFileManager
 		return r;
 	}
 	
-	private Read parse(SAMRecordIterator it) throws IOException
+	private static Read parse(SAMRecordIterator it) throws IOException
 	{
 		if(!it.hasNext()) return null;
 		SAMRecord record = it.next();
