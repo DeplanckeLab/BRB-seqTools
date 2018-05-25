@@ -11,6 +11,8 @@ enum Strand{NO, YES, REVERSE};
 
 public class Parameters 
 {
+	public static final String currentVersion = "1.3";
+	
 	// Input parameters
 	public static String tmpFolder = null;
 	public static String outputFolder = null;
@@ -29,9 +31,11 @@ public class Parameters
 	public static Strand stranded = Strand.YES; 
 	public static long chunkSize = 1000000;
 	public static boolean autoFindBarcode = false;
+	public static boolean addReadGroup = false;
 	public static String separator = ":";
 	
 	// Computed variables
+	public static HashSet<String> readGroups = new HashSet<String>();
 	public static int noFeature = 0;
 	public static int notUnique = 0;
 	public static int ambiguous = 0;
@@ -623,6 +627,9 @@ public class Parameters
 							System.exit(-1);
 						}
 						break;
+					case "-rg":
+						addReadGroup = true;
+						break;
 					case "-t":
 						i++;
 						try
@@ -705,6 +712,8 @@ public class Parameters
 			System.err.println("You specified a UMI length but your barcode pattern does not contain 'U', you should specify where to find the UMI in R1");
 			System.exit(-1);
 		}
+		if(addReadGroup) System.out.println("Read Groups information will be added to the annotated BAM using the @RG tag");
+		else System.out.println("No Read Group information will be added to the annotated BAM (use '-rg' option to add it)");
 		System.out.println("Barcode Pattern = " + barcodePattern);
 		System.out.println("ChunkSize = " + chunkSize + " i.e. no more than " + chunkSize + " reads will be stored in RAM.");
 		if(outputFolder == null)
@@ -832,7 +841,7 @@ public class Parameters
 	
 	private static void printHelpDGE()
 	{
-		System.out.println("BRBseq-tools 1.1 [CreateDGEMatrix]\n\nOptions:");
+		System.out.println("BRBseq-tools " + Parameters.currentVersion + " [CreateDGEMatrix]\n\nOptions:");
 		System.out.println("-f %s \t\t[Required] Path of R1 FastQ file.");
 		System.out.println("-b %s \t\t[Required] Path of R2 aligned BAM file [do not need to be sorted or indexed].");
 		System.out.println("-c %s \t\t[Required] Path of Barcode/Samplename mapping file.");
@@ -849,13 +858,14 @@ public class Parameters
 	
 	private static void printHelpAnnoBAM()
 	{
-		System.out.println("BRBseq-tools 1.1 [AnnotateBAM]\n\nOptions:");
+		System.out.println("BRBseq-tools " + Parameters.currentVersion + " [AnnotateBAM]\n\nOptions:");
 		System.out.println("-f %s \t\t[Required] Path of R1 FastQ file.");
 		System.out.println("-b %s \t\t[Required] Path of R2 aligned BAM file [do not need to be sorted or indexed].");
 		System.out.println("-c %s \t\tPath of Barcode/Samplename mapping file.");
 		System.out.println("-gtf %s \tPath of GTF file (for UMI counting).");
 		System.out.println("-s %s \t\tDo you want to annotate genes only in case where reads are falling on same strand? [no, yes, reverse] (default = yes since BRB-seq is stranded protocol).");
 		System.out.println("-n %i \t\tNumber of allowed difference with the barcode.");
+		System.out.println("-rg \t\tAdd Read Group information (for GATK / Picard MarkDuplicates / etc...).");
 		System.out.println("-o %s \t\tOutput folder");
 		System.out.println("-t %s \t\tPath of existing folder for storing temporary files");
 		System.out.println("-chunkSize %i\tMaximum number of reads to be stored in RAM (default = 1000000)");
@@ -865,7 +875,7 @@ public class Parameters
 	
 	private static void printHelpDemultiplex()
 	{
-		System.out.println("BRBseq-tools 1.1 [Demultiplex]\n\nOptions:");
+		System.out.println("BRBseq-tools " + Parameters.currentVersion + " [Demultiplex]\n\nOptions:");
 		System.out.println("-r1 %s \t\t[Required] Path of R1 FastQ files (containing barcode and optionally UMIs).");
 		System.out.println("-r2 %s \t\t[Required] Path of R2 FastQ files (containing read sequence).");
 		System.out.println("-c %s \t\t[Required] Path of Barcode/Samplename mapping file.");
@@ -877,7 +887,7 @@ public class Parameters
 	
 	private static void printHelpTrim()
 	{
-		System.out.println("BRBseq-tools 1.1 [Trim]\n\nOptions:");
+		System.out.println("BRBseq-tools " + Parameters.currentVersion + " [Trim]\n\nOptions:");
 		System.out.println("-f %s \t\t[Required] Path of FastQ file to trim (or containing folder for processing all fastq files recursively).");
 		System.out.println("-o %s \t\tOutput folder");
 		System.out.println("-uniqueBarcode\tIf the fastq file(s) contain(s) only one barcode (for e.g. after demultiplexing), this option can be used for searching the specific barcode (most occuring) in the construct and trimming it when present.");
@@ -887,7 +897,7 @@ public class Parameters
 	
 	public static void printHelp()
 	{
-		System.out.println("BRBseq-tools 1.1\n\nOptions:");
+		System.out.println("BRBseq-tools " + Parameters.currentVersion + "\n\nOptions:");
 		System.out.println("CreateDGEMatrix\tCreate the DGE Matrix (counts + UMI) from R2 aligned BAM and R1 fastq");
 		System.out.println("Demultiplex\tCreate demultiplexed fastq files from R1+R2 fastq (use this if you want to process them independently, if not, use the CreateDGEMatrix option)");
 		System.out.println("Trim\t\tFor trimming BRBseq construct in R2 fastq file or demultiplexed fastq files.");

@@ -29,7 +29,7 @@ public class BRBseqTools
 			switch(args[0])
 			{
 				case "CreateDGEMatrix":
-					System.out.println("BRBSeqTools 1.2 [CreateDGEMatrix]\n");
+					System.out.println("BRBSeqTools " + Parameters.currentVersion + " [CreateDGEMatrix]\n");
 					Parameters.loadDGE(argsParsed);
 					Parameters.barcodes = Utils.readConfig();
 					Parameters.BC1 = new ArrayList<String>();
@@ -44,7 +44,7 @@ public class BRBseqTools
 					DGEMatrixManager.createOutputDGE();
 					break;
 				case "AnnotateBAM":
-					System.out.println("BRBSeqTools 1.2 [AnnotateBAM]\n");
+					System.out.println("BRBSeqTools " + Parameters.currentVersion + " [AnnotateBAM]\n");
 					Parameters.loadAnnoBAM(argsParsed);
 					if(Parameters.inputConfigFile != null)
 					{
@@ -62,7 +62,7 @@ public class BRBseqTools
 					AnnotateBAMManager.annotate();
 					break;
 				case "Demultiplex":
-					System.out.println("BRBSeqTools 1.2 [Demultiplex]\n");
+					System.out.println("BRBSeqTools " + Parameters.currentVersion + " [Demultiplex]\n");
 					Parameters.loadDemultiplex(argsParsed);		
 					Parameters.barcodes = Utils.readConfig();
 					Parameters.BC1 = new ArrayList<String>();
@@ -74,7 +74,7 @@ public class BRBseqTools
 					DemultiplexingManager.demultiplex();
 					break;
 				case "Trim":
-					System.out.println("BRBSeqTools 1.2 [Trim]\n");
+					System.out.println("BRBSeqTools " + Parameters.currentVersion + " [Trim]\n");
 					Parameters.loadTrim(argsParsed);
 					BufferedWriter bw_excel = new BufferedWriter(new FileWriter(Parameters.outputFolder + "brbseq.trimming.output.txt"));
 					bw_excel.write("sample\tnbReads\tnbRemaininingReads\tnbContaminated\tnbPolyATrimmed\tnbRemoved\tnbPolyABefore\n");

@@ -178,7 +178,7 @@ public class TmpFileManager
 			// Remove from top
 			reads.remove(r);
 			topReads.remove(readName);
-			whichReader.remove(readName);
+			whichReaderSAM.remove(readName);
 			return r;
 		}
 		else // this is not a read mapped

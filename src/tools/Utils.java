@@ -133,6 +133,14 @@ public class Utils
 				}
 			}
 			else read.barcode = barcode;
+			if(Parameters.addReadGroup) // Do it in advance to directly create the correct header in output annotated BAM file (in case it is needed)
+			{
+				String[] tokens = read.name.split(":"); // TODO what if this does not work? Here the example that works is readName="NB500883:254:HL2K3BGX5:3:13509:21553:18111"
+				String sampleName = "UNKNOWN";
+				if(read.barcodeMatch) sampleName = Parameters.mappingBarcodeName.get(read.barcode).replaceAll("\\.", "_");
+				String id = tokens[2] + "." + sampleName + "." + tokens[3];
+				Parameters.readGroups.add(id);
+			}
 		}
 		br.readLine(); // Third line = we don't care
 		String line = br.readLine();  // Fourth line = qualities

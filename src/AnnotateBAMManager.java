@@ -5,6 +5,7 @@ import java.util.TreeSet;
 import htsjdk.samtools.SAMFileHeader;
 import htsjdk.samtools.SAMFileWriter;
 import htsjdk.samtools.SAMFileWriterFactory;
+import htsjdk.samtools.SAMReadGroupRecord;
 import htsjdk.samtools.SAMRecord;
 import htsjdk.samtools.SAMRecordIterator;
 import htsjdk.samtools.SamReader;
@@ -55,7 +56,6 @@ public class AnnotateBAMManager
 				{
 					Parameters.notUnique++;
 					bamRecord.record.setAttribute("CO", "__alignment_not_unique");
-					lines.add(bamRecord);
 				}
 				else if(samRecord.getReadUnmappedFlag())
 				{
@@ -118,7 +118,7 @@ public class AnnotateBAMManager
 	}
 	
 	/**
-	 * Read temporary sorted BAM/fastq files and mark/remove duplicates
+	 * Read temporary sorted BAM/fastq files
 	 * @throws Exception Yes I know...
 	 */
 	public static void annotate() throws Exception
@@ -127,6 +127,20 @@ public class AnnotateBAMManager
 		System.out.println("\nStarting annotation of BAM...");
 		TmpFileManager fm_fastq = new TmpFileManager("fastq", Parameters.nbTmpFastq);
 		TmpFileManager fm_bam = new TmpFileManager("sam", Parameters.nbTmpBAM);
+		
+		// Modify the header to add read groups if requested
+		if(Parameters.addReadGroup)
+		{
+			for(String id:Parameters.readGroups)
+			{
+				SAMReadGroupRecord rgr = new SAMReadGroupRecord(id);
+				rgr.setLibrary("LIB-UNKNOWN"); // Assume that there is only one library in the file
+				rgr.setSample(id.split("\\.")[1]);
+				rgr.setPlatform("ILLUMINA");
+				rgr.setPlatformUnit(id); // Redundant with ID
+				header.addReadGroup(rgr);
+			}
+		}
 		
 		// Read Tmp files and generate the new BAM on the go
 		int nbReadsWritten = 0;
@@ -140,10 +154,18 @@ public class AnnotateBAMManager
 			if(r_bam != null) 
 			{
 				nbReadsWritten++;
+				String sampleName = "UNKNOWN";
 				if(Parameters.l1 != -1) 
 				{
 					r_bam.samRecord.setAttribute("BC", r_fq.barcode);
 					r_bam.samRecord.setAttribute("QT", r_fq.qualityBC);
+					if(!r_fq.barcode.equals("Unknown")) sampleName = Parameters.mappingBarcodeName.get(r_fq.barcode).replaceAll("\\.", "_"); // Define the name if it exists
+				}
+				if(Parameters.addReadGroup)
+				{
+					String[] tokens = r_bam.samRecord.getReadName().split(":"); // TODO what if this does not work? Here the example that works is readName="NB500883:254:HL2K3BGX5:3:13509:21553:18111"
+					String id = tokens[2] + "." + sampleName + "." + tokens[3];
+					r_bam.samRecord.setAttribute("RG", id); // For each read we add the "@RG:ID field"
 				}
 				if(Parameters.UMILength != -1)
 				{
@@ -160,7 +182,7 @@ public class AnnotateBAMManager
 			}
 		}
 		samWriter.close();
-
+	
 		// Clean tmp files
 		fm_bam.closeSAMReaders();
 		TmpFileManager.delete("fastq", Parameters.nbTmpFastq);
