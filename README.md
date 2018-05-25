@@ -12,7 +12,7 @@ The .jar file contains all required materials and can be run on any terminal.
 
 ## Dependencies
 ### Java version
-For the tools to run properly, you must have Java 1.8 installed. 
+For the tools to run properly, you must have Java >=1.8 installed. 
 
 To check your java version, open your terminal application and r
 un the following command:
