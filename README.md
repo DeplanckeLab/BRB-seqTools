@@ -1,13 +1,13 @@
 ![](https://img.shields.io/badge/build-passing-green.svg)
-![](https://img.shields.io/badge/version-1.2-blue.svg)
+![](https://img.shields.io/badge/version-1.3-blue.svg)
 ![](https://img.shields.io/badge/picard-2.9.0-blue.svg)
 ![](https://img.shields.io/badge/java-1.8-red.svg)
 
-# BRB-seq Tools 1.2
+# BRB-seq Tools
 A suite of tools for the pre-processing of BRB-seq data (bulk RNA-seq)
 
 ## Download software
-BRB-seq command-line tools are provided as a [single executable jar file](../master/releases/BRBseqTools.1.2.jar?raw=true).
+BRB-seq command-line tools are provided as a [single executable jar file](../master/releases/BRBseqTools.1.3.jar?raw=true).
 The .jar file contains all required materials and can be run on any terminal.
 
 ## Dependencies
@@ -39,7 +39,7 @@ For further analyses (filtering, normalization, dimension reduction, clustering,
 To check that BRB-seq Tools is working properly, run the following command:
 
 ```bash
-java -jar BRBseqTools.1.2.jar
+java -jar BRBseqTools.jar
 ```
 As shown in the output of this command, BRB-seq tool suite allows the user to run 3 possible tools.
 
@@ -52,6 +52,7 @@ AnnotateBAM     For annotating the R2 BAM file using UMIs/Barcodes from the R1 f
 
 ### Demultiplex
 This tool is used when you need to generate all the fastq files corresponding to all your multiplexed samples. You end up with one fastq file per sample.
+> **Note:** If you use the "AnnotateBAM" tool, you can also demultiplex the annotated BAM file using GATK SplitReads
 
 Options:
 ```
@@ -71,11 +72,11 @@ Options:
 
 Example:
 ```bash
-java -jar BRBseqTools.1.2.jar Demultiplex -r1 lib_example_R1.fastq.gz -r2 lib_example_R2.fastq.gz -c lib_example_barcodes.txt -p BU -UMI 14
+java -jar BRBseqTools.jar Demultiplex -r1 lib_example_R1.fastq.gz -r2 lib_example_R2.fastq.gz -c lib_example_barcodes.txt -p BU -UMI 14
 ```
 or, if no UMI:
 ```bash
-java -jar BRBseqTools.1.2.jar Demultiplex -r1 lib_example_R1.fastq.gz -r2 lib_example_R2.fastq.gz -c lib_example_barcodes.txt -p B
+java -jar BRBseqTools.jar Demultiplex -r1 lib_example_R1.fastq.gz -r2 lib_example_R2.fastq.gz -c lib_example_barcodes.txt -p B
 ```
 
 > **Note:** When using this tool, UMIs are kept as indexes in all output .fastq files
@@ -106,22 +107,24 @@ Options:
 
 Example:
 ```bash
-java -jar BRBseqTools.1.2.jar CreateDGEMatrix -f lib_example_R1.fastq.gz -b lib_example_R2.bam -c lib_example_barcodes.txt -gtf Homo_sapiens.GRCh38.90.gtf.gz -p BU -UMI 14
+java -jar BRBseqTools.jar CreateDGEMatrix -f lib_example_R1.fastq.gz -b lib_example_R2.bam -c lib_example_barcodes.txt -gtf Homo_sapiens.GRCh38.90.gtf.gz -p BU -UMI 14
 ```
 
 > **Note:** The original BRB-seq protocol contains a UMI construct. But you can also generate a library without UMIs, or even not sequence the UMIs from R2 read. If UMIs are present, both UMI and read count matrices will be generated. If not, only the read count table will be generated.
 
 ### AnnotateBAM
-This tool is used when you need specific downstream analyses of your BAM files that are not handled by BRBseqTools. It creates an annotated BAM file containing the UMI/Barcodes and can also have annotated genes information. For example, it allows you to use pipelines such as Picard MarkDuplicates, that can use the UMI/Barcode information for better quantifying the duplicated reads (Picard options BARCODE_TAG=BC READ_ONE_BARCODE_TAG=BX)
+This tool is used when you need specific downstream analyses of your BAM files that are not handled by BRBseqTools. It creates an annotated BAM file containing the UMI/Barcodes and can also have annotated genes information. 
+> **Note:** This tool allows you to use pipelines such as Picard MarkDuplicates, that can use the UMI/Barcode information for better quantifying the duplicated reads (Picard options BARCODE_TAG=BC READ_ONE_BARCODE_TAG=BX), you can also demultiplex the annotated BAM file using GATK SplitReads
 
 Options:
 ```
 -f %s           [Required] Path of R1 FastQ file [can be gzipped or raw].
 -b %s           [Required] Path of R2 aligned BAM file [do not need to be sorted or indexed].
 -c %s           Path of Barcode/Samplename mapping file¹.
--gtf %s         Path of GTF file [can be gzipped or raw].
+-gtf %s         Path of GTF file [can be gzipped or raw] fir annoting mapped genes
 -n %i           Number of allowed difference with the barcode [ambiguous reads will be automatically discarded].
 -s %s           Do you want to annotate genes only in case where reads are falling on same strand? [no, yes, reverse] (default = yes since BRB-seq is stranded protocol
+-rg             Add Read Group information (for GATK / Picard MarkDuplicates / etc...). Can replace gatk AddOrReplaceReadGroups.
 -o %s           Output folder
 -t %s           Path of existing folder for storing temporary files
 -chunkSize %i   Maximum number of reads to be stored in RAM (default = 10000000)
@@ -136,7 +139,7 @@ Options:
 
 Example:
 ```bash
-java -jar BRBseqTools.1.2.jar AnnotateBAM -f lib_example_R1.fastq.gz -b lib_example_R2.bam -p BU -UMI 14
+java -jar BRBseqTools.jar AnnotateBAM -f lib_example_R1.fastq.gz -b lib_example_R2.bam -p BU -UMI 14
 ```
 
 > **Note:** Most of the options are optionals here. If not put, then the corresponding tag will simply not be added to the annotated BAM.
@@ -157,7 +160,7 @@ Options:
 
 Example:
 ```bash
-java -jar BRBseqTools.1.2.jar Trim -f lib_example_R2.fastq.gz
+java -jar BRBseqTools.jar Trim -f lib_example_R2.fastq.gz
 ```
 
 > **Note:** If you use STAR for alignment, this step is optional, as it will not change much the results of the alignment (our tests have shown that the improvement is real but very minor)
@@ -185,7 +188,7 @@ STAR --runMode genomeGenerate --genomeDir STAR_Index/ --genomeFastaFiles Homo_sa
 When the index is built, you will never need to rebuild it. Then you can use only the following script:
 ```bash
 # (Optional) Trim the read containing the sequence fragments (generates a 'lib_example_R2.trimmed.fastq.gz' file)
-java -jar BRBseqTools.1.2.jar Trim -f lib_example_R2.fastq.gz
+java -jar BRBseqTools.jar Trim -f lib_example_R2.fastq.gz
 # Create output folder
 mkdir BAM/
 # Align only the R2 fastq file (using STAR, no sorting/indexing is needed)
@@ -195,7 +198,7 @@ STAR --runMode alignReads --genomeDir STAR_Index/ --outFilterMultimapNmax 1 --re
 # (optional) Rename the output aligned BAM
 mv BAM/Aligned.out.bam BAM/lib_example_R2.bam
 # Demultiplex and generate output count/UMI matrix
-java -jar BRBseqTools.1.2.jar CreateDGEMatrix -f lib_example_R1.fastq.gz -b BAM/lib_example_R2.bam -c lib_example_barcodes.txt -gtf Homo_sapiens.GRCh38.90.gtf -p BU -UMI 14
+java -jar BRBseqTools.jar CreateDGEMatrix -f lib_example_R1.fastq.gz -b BAM/lib_example_R2.bam -c lib_example_barcodes.txt -gtf Homo_sapiens.GRCh38.90.gtf -p BU -UMI 14
 # Note: This example suppose that R1 has barcode followed by 14bp UMI (see above for other cases)
 # Note: 'lib_example_barcodes.txt' should be created by the user and should contain the mapping between the barcode and the sample name¹
 ```
