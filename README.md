@@ -54,7 +54,7 @@ AnnotateBAM     For annotating the R2 BAM file using UMIs/Barcodes from the R1 f
 
 First if you don't already have an indexed genome, you need to build the index (for STAR)
 ```bash
-# Download last release of homo sapiens .fasta file on Ensembl
+# Download last release of your species of interest .fasta file on Ensembl (or any other that you'd prefer to use)
 wget ftp://ftp.ensembl.org/pub/release-90/fasta/homo_sapiens/dna/Homo_sapiens.GRCh38.dna.primary_assembly.fa.gz
 # Unzip
 gzip -d Homo_sapiens.GRCh38.dna.primary_assembly.fa.gz
