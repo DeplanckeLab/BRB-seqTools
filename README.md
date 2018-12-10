@@ -54,11 +54,11 @@ AnnotateBAM     For annotating the R2 BAM file using UMIs/Barcodes from the R1 f
 
 First if you don't already have an indexed genome, you need to build the index (for STAR)
 ```bash
-# Download last release of your species of interest .fasta file on Ensembl (or any other that you'd prefer to use)
+# Download last release of your species of interest .fasta file from Ensembl (or any other database that you'd prefer to use). Here e.g. Homo sapiens from Ensembl
 wget ftp://ftp.ensembl.org/pub/release-90/fasta/homo_sapiens/dna/Homo_sapiens.GRCh38.dna.primary_assembly.fa.gz
 # Unzip
 gzip -d Homo_sapiens.GRCh38.dna.primary_assembly.fa.gz
-# Download last release of homo sapiens .gtf file on Ensembl
+# Download last release of homo sapiens .gtf file from Ensembl
 wget ftp://ftp.ensembl.org/pub/release-90/gtf/homo_sapiens/Homo_sapiens.GRCh38.90.gtf.gz
 # Unzip
 gzip -d Homo_sapiens.GRCh38.90.gtf.gz
@@ -84,7 +84,8 @@ STAR --runMode alignReads --genomeDir STAR_Index/ --outFilterMultimapNmax 1 --re
 mv BAM/Aligned.out.bam BAM/lib_example_R2.bam
 # Demultiplex and generate output count/UMI matrix
 java -jar BRBseqTools.jar CreateDGEMatrix -f lib_example_R1.fastq.gz -b BAM/lib_example_R2.bam -c lib_example_barcodes.txt -gtf Homo_sapiens.GRCh38.90.gtf -p BU -UMI 14
-# Note: This example suppose that R1 has barcode followed by 14bp UMI (see above for other cases)
+# Note: This example suppose that R1 has barcode followed by 14bp UMI
+# Note: The ‘-p’ option specifies the pattern in the R1 fastq files. If you sequenced only the 6bp barcode then you should use ‘-p B’, but if you sequenced the barcode + 10bp UMIs, then it should be ‘-p BU’ (for Barcode followed by UMI) and then you need to specify the UMI length with ‘-UMI 14’. In case you sequenced some bp you don’t want to use, you can use the ‘?’ character. For e.g. you sequenced 10bp UMI but the R1 contains extra 4bp after the UMI that are not UMI, then you should use “-p BU???? -UMI 10”
 # Note: 'lib_example_barcodes.txt' should be created by the user and should contain the mapping between the barcode and the sample name¹
 ```
 
