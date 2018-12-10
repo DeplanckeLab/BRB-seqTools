@@ -85,7 +85,8 @@ mv BAM/Aligned.out.bam BAM/lib_example_R2.bam
 # Demultiplex and generate output count/UMI matrix
 java -jar BRBseqTools.jar CreateDGEMatrix -f lib_example_R1.fastq.gz -b BAM/lib_example_R2.bam -c lib_example_barcodes.txt -gtf Homo_sapiens.GRCh38.90.gtf -p BU -UMI 14
 # Note: This example suppose that R1 has barcode followed by 14bp UMI
-# Note: The ‘-p’ option specifies the pattern in the R1 fastq files. If you sequenced only the 6bp barcode then you should use ‘-p B’, but if you sequenced the barcode + 10bp UMIs, then it should be ‘-p BU’ (for Barcode followed by UMI) and then you need to specify the UMI length with ‘-UMI 14’. In case you sequenced some bp you don’t want to use, you can use the ‘?’ character. For e.g. you sequenced 10bp UMI but the R1 contains extra 4bp after the UMI that are not UMI, then you should use “-p BU???? -UMI 10”
+# Note: The ‘-p’ option specifies the pattern in the R1 fastq files. If you sequenced only the 6bp barcode then you should use ‘-p B’, but if you sequenced the barcode + 10bp UMIs, then it should be ‘-p BU’ (for Barcode followed by UMI) and then you need to specify the UMI length with ‘-UMI 10’. 
+# Note: In case you sequenced some bp you don’t want to use, you can use the ‘?’ character. For e.g. you sequenced 10bp UMI but the R1 contains extra 4bp after the UMI that are not UMI, then you should use “-p BU???? -UMI 10”
 # Note: 'lib_example_barcodes.txt' should be created by the user and should contain the mapping between the barcode and the sample name¹
 ```
 
