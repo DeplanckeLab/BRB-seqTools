@@ -50,6 +50,49 @@ Trim            For trimming BRBseq construct in R2 fastq file or demultiplexed 
 AnnotateBAM     For annotating the R2 BAM file using UMIs/Barcodes from the R1 fastq and/or GTF and/or Barcode files
 ```
 
+## Example of full pipeline (using STAR)
+
+First if you don't already have an indexed genome, you need to build the index (for STAR)
+```bash
+# Download last release of homo sapiens .fasta file on Ensembl
+wget ftp://ftp.ensembl.org/pub/release-90/fasta/homo_sapiens/dna/Homo_sapiens.GRCh38.dna.primary_assembly.fa.gz
+# Unzip
+gzip -d Homo_sapiens.GRCh38.dna.primary_assembly.fa.gz
+# Download last release of homo sapiens .gtf file on Ensembl
+wget ftp://ftp.ensembl.org/pub/release-90/gtf/homo_sapiens/Homo_sapiens.GRCh38.90.gtf.gz
+# Unzip
+gzip -d Homo_sapiens.GRCh38.90.gtf.gz
+# Generate the STAR genome index (in 'STAR_Index' folder) => This require ~30G RAM
+mkdir STAR_Index/
+STAR --runMode genomeGenerate --genomeDir STAR_Index/ --genomeFastaFiles Homo_sapiens.GRCh38.dna.primary_assembly.fa --sjdbGTFfile Homo_sapiens.GRCh38.90.gtf
+# Note: you can add the argument '--runThreadN 4' for running 4 threads in parallel (or more if your computer has enough cores)
+# Note: if genome is not human, you need to add/tune the argument '--genomeSAindexNbases xx' with xx = log2(nbBasesInGenome)/2 - 1
+#	For e.g. for drosophila melanogaster xx ~ 12.43, thus you should add the argument '--genomeSAindexNbases 12'
+```
+
+When the index is built, you will never need to rebuild it. Then you can use only the following script:
+```bash
+# (Optional) Trim the read containing the sequence fragments (generates a 'lib_example_R2.trimmed.fastq.gz' file)
+java -jar BRBseqTools.jar Trim -f lib_example_R2.fastq.gz
+# Create output folder
+mkdir BAM/
+# Align only the R2 fastq file (using STAR, no sorting/indexing is needed)
+STAR --runMode alignReads --genomeDir STAR_Index/ --outFilterMultimapNmax 1 --readFilesCommand zcat --outSAMtype BAM Unsorted --outFileNamePrefix BAM/ --readFilesIn lib_example_R2.trimmed.fastq.gz
+# Note: you can add the argument '--runThreadN 4' for running 4 threads in parallel (or more if your computer has enough cores)
+# Note: the '--outFilterMultimapNmax 1' option is recommended for removing multiple mapping reads from the output BAM
+# (optional) Rename the output aligned BAM
+mv BAM/Aligned.out.bam BAM/lib_example_R2.bam
+# Demultiplex and generate output count/UMI matrix
+java -jar BRBseqTools.jar CreateDGEMatrix -f lib_example_R1.fastq.gz -b BAM/lib_example_R2.bam -c lib_example_barcodes.txt -gtf Homo_sapiens.GRCh38.90.gtf -p BU -UMI 14
+# Note: This example suppose that R1 has barcode followed by 14bp UMI (see above for other cases)
+# Note: 'lib_example_barcodes.txt' should be created by the user and should contain the mapping between the barcode and the sample name¹
+```
+
+¹You can download/edit this **[example of barcode/samplename mapping file](../master/examples/lib_example_barcodes.txt)**
+
+Then you can load the generated 'output.dge.reads.txt' count matrix in R and performs your analyses (or 'output.dge.umis.txt' if you prefer working with UMIs).
+Or you can upload this file to https://asap.epfl.ch and run the analysis pipeline online.
+
 ### Demultiplex
 This tool is used when you need to generate all the fastq files corresponding to all your multiplexed samples. You end up with one fastq file per sample.
 > **Note:** If you use the "AnnotateBAM" tool, you can also demultiplex the annotated BAM file using GATK SplitReads
@@ -164,49 +207,6 @@ java -jar BRBseqTools.jar Trim -f lib_example_R2.fastq.gz
 ```
 
 > **Note:** If you use STAR for alignment, this step is optional, as it will not change much the results of the alignment (our tests have shown that the improvement is real but very minor)
-
-## Example of full pipeline (using STAR)
-
-First if you don't already have an indexed genome, you need to build the index (for STAR)
-```bash
-# Download last release of homo sapiens .fasta file on Ensembl
-wget ftp://ftp.ensembl.org/pub/release-90/fasta/homo_sapiens/dna/Homo_sapiens.GRCh38.dna.primary_assembly.fa.gz
-# Unzip
-gzip -d Homo_sapiens.GRCh38.dna.primary_assembly.fa.gz
-# Download last release of homo sapiens .gtf file on Ensembl
-wget ftp://ftp.ensembl.org/pub/release-90/gtf/homo_sapiens/Homo_sapiens.GRCh38.90.gtf.gz
-# Unzip
-gzip -d Homo_sapiens.GRCh38.90.gtf.gz
-# Generate the STAR genome index (in 'STAR_Index' folder) => This require ~30G RAM
-mkdir STAR_Index/
-STAR --runMode genomeGenerate --genomeDir STAR_Index/ --genomeFastaFiles Homo_sapiens.GRCh38.dna.primary_assembly.fa --sjdbGTFfile Homo_sapiens.GRCh38.90.gtf
-# Note: you can add the argument '--runThreadN 4' for running 4 threads in parallel (or more if your computer has enough cores)
-# Note: if genome is not human, you need to add/tune the argument '--genomeSAindexNbases xx' with xx = log2(nbBasesInGenome)/2 - 1
-#	For e.g. for drosophila melanogaster xx ~ 12.43, thus you should add the argument '--genomeSAindexNbases 12'
-```
-
-When the index is built, you will never need to rebuild it. Then you can use only the following script:
-```bash
-# (Optional) Trim the read containing the sequence fragments (generates a 'lib_example_R2.trimmed.fastq.gz' file)
-java -jar BRBseqTools.jar Trim -f lib_example_R2.fastq.gz
-# Create output folder
-mkdir BAM/
-# Align only the R2 fastq file (using STAR, no sorting/indexing is needed)
-STAR --runMode alignReads --genomeDir STAR_Index/ --outFilterMultimapNmax 1 --readFilesCommand zcat --outSAMtype BAM Unsorted --outFileNamePrefix BAM/ --readFilesIn lib_example_R2.trimmed.fastq.gz
-# Note: you can add the argument '--runThreadN 4' for running 4 threads in parallel (or more if your computer has enough cores)
-# Note: the '--outFilterMultimapNmax 1' option is recommended for removing multiple mapping reads from the output BAM
-# (optional) Rename the output aligned BAM
-mv BAM/Aligned.out.bam BAM/lib_example_R2.bam
-# Demultiplex and generate output count/UMI matrix
-java -jar BRBseqTools.jar CreateDGEMatrix -f lib_example_R1.fastq.gz -b BAM/lib_example_R2.bam -c lib_example_barcodes.txt -gtf Homo_sapiens.GRCh38.90.gtf -p BU -UMI 14
-# Note: This example suppose that R1 has barcode followed by 14bp UMI (see above for other cases)
-# Note: 'lib_example_barcodes.txt' should be created by the user and should contain the mapping between the barcode and the sample name¹
-```
-
-¹You can download/edit this **[example of barcode/samplename mapping file](../master/examples/lib_example_barcodes.txt)**
-
-Then you can load the generated 'output.dge.reads.txt' count matrix in R and performs your analyses (or 'output.dge.umis.txt' if you prefer working with UMIs).
-Or you can upload this file to https://asap.epfl.ch and run the analysis pipeline online.
 
 ## Directory content
 * **src**: all source files required for compilation
