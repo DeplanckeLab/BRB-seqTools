@@ -27,7 +27,7 @@ If not, you may need to update your version; see the [Oracle Java website](http:
 ### Picard
 The software relies on [Picard Tools](http://broadinstitute.github.io/picard/), but the Picard JAR is already embedded in the released JAR, so no need to install it yourself.
 
-## Usage
+## Sequencing output
 After sequencing your BRB-seq libraries, you should obtain two fastq files per library: 
 * R1 fastq file: This file should contain the barcodes and UMIs of the BRBseq construct. Usually, the barcode comes before the UMI sequence. And the UMI sequence is optional.
 * R2 fastq file: This file should contain the exact same number of reads (and read names) than the R1 file. Except that the sequence of the reads are the sequences representing the RNA fragments.
@@ -35,7 +35,7 @@ After sequencing your BRB-seq libraries, you should obtain two fastq files per l
 BRB-seq tools is a suite dedicated to help you analyze these data, until the generation of the output count/UMI matrix.
 For further analyses (filtering, normalization, dimension reduction, clustering, differential expression), we recommend using [ASAP web portal](https://www.ncbi.nlm.nih.gov/pubmed/28541377) that you can freely access at [asap.epfl.ch](https://asap.epfl.ch).
 
-### Installation
+## Installation
 To check that BRB-seq Tools is working properly, run the following command:
 
 ```bash
@@ -92,6 +92,9 @@ java -jar BRBseqTools.jar CreateDGEMatrix -f lib_example_R1.fastq.gz -b BAM/lib_
 
 Then you can load the generated 'output.dge.reads.txt' count matrix in R and performs your analyses (or 'output.dge.umis.txt' if you prefer working with UMIs).
 Or you can upload this file to https://asap.epfl.ch and run the analysis pipeline online.
+
+## Usage
+Here follows the description of each tool in more details.
 
 ### Demultiplex
 This tool is used when you need to generate all the fastq files corresponding to all your multiplexed samples. You end up with one fastq file per sample.
