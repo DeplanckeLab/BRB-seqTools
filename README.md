@@ -41,7 +41,7 @@ To check that BRB-seq Tools is working properly, run the following command:
 ```bash
 java -jar BRBseqTools.jar
 ```
-As shown in the output of this command, BRB-seq tool suite allows the user to run 3 possible tools.
+As shown in the output of this command, BRB-seq tool suite allows the user to run 4 possible tools.
 
 ```
 Demultiplex     Create demultiplexed fastq files from R1+R2 fastq (use this if you want to process them independently, thus doing the next steps without BRBseqTools)
