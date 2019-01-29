@@ -2,6 +2,7 @@
 ![](https://img.shields.io/badge/version-1.3-blue.svg)
 ![](https://img.shields.io/badge/picard-2.9.0-blue.svg)
 ![](https://img.shields.io/badge/java-1.8-red.svg)
+[![DOI](https://zenodo.org/badge/109837582.svg)](https://zenodo.org/badge/latestdoi/109837582)
 
 # BRB-seq Tools
 A suite of tools for the pre-processing of BRB-seq data (bulk RNA-seq)
