@@ -134,9 +134,9 @@ public class AnnotateBAMManager
 			for(String id:Parameters.readGroups)
 			{
 				SAMReadGroupRecord rgr = new SAMReadGroupRecord(id);
-				rgr.setLibrary("LIB-UNKNOWN"); // Assume that there is only one library in the file
+				rgr.setLibrary(Parameters.libname); // Assume that there is only one library in the file
 				rgr.setSample(id.split("\\.")[1]);
-				rgr.setPlatform("ILLUMINA");
+				rgr.setPlatform(Parameters.platform);
 				rgr.setPlatformUnit(id); // Redundant with ID
 				header.addReadGroup(rgr);
 			}

@@ -32,6 +32,8 @@ public class Parameters
 	public static long chunkSize = 1000000;
 	public static boolean autoFindBarcode = false;
 	public static boolean addReadGroup = false;
+	public static String libname = "LIB-UNKNOWN";
+	public static String platform = "ILLUMINA";
 	public static String separator = ":";
 	
 	// Computed variables
@@ -630,6 +632,14 @@ public class Parameters
 					case "-rg":
 						addReadGroup = true;
 						break;
+					case "-lib":
+						i++;
+						Parameters.libname = args[i].trim();
+						break;
+					case "-platform":
+						i++;
+						Parameters.platform = args[i].trim();
+						break;
 					case "-t":
 						i++;
 						try
@@ -712,7 +722,12 @@ public class Parameters
 			System.err.println("You specified a UMI length but your barcode pattern does not contain 'U', you should specify where to find the UMI in R1");
 			System.exit(-1);
 		}
-		if(addReadGroup) System.out.println("Read Groups information will be added to the annotated BAM using the @RG tag");
+		if(addReadGroup) 
+		{
+			System.out.println("Read Groups information will be added to the annotated BAM using the @RG tag");
+			System.out.println("@RGL Library tag = " + Parameters.libname + " (use '-lib' to change)");
+			System.out.println("@RGPL Platform tag = " + Parameters.platform + " (use '-platform' to change)");
+		}
 		else System.out.println("No Read Group information will be added to the annotated BAM (use '-rg' option to add it)");
 		System.out.println("Barcode Pattern = " + barcodePattern);
 		System.out.println("ChunkSize = " + chunkSize + " i.e. no more than " + chunkSize + " reads will be stored in RAM.");
