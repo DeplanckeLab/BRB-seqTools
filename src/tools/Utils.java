@@ -328,7 +328,7 @@ public class Utils
 		while(line != null)
 		{
 			String[] barcodes = line.split("\t");
-			if(barcodes.length >= 1)
+			if(barcodes.length > 1)
 			{
 				String B1 = barcodes[indexes[0]].trim();
 				if(indexes[1] != -1) Parameters.mappingBarcodeName.put(B1, barcodes[indexes[1]].trim());
