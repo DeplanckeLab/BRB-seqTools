@@ -51,8 +51,7 @@ public class GTF
 					}
 				}
 				if(gene_name == null) gene_name = gene_id;
-				if(gene_id == null) gene_id = gene_name;
-				if(gene_id != null && gene_name != null)
+				if(gene_id != null)
 				{
 					// Which type is it?
 					if(type.equals("exon")) 
