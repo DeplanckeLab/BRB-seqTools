@@ -55,7 +55,7 @@ public class Parameters
 	public static ArrayList<String> BC1;
 	public static int lengthBarcode = 0;
 	public static HashMap<String, String> mappingBarcodeName = null;
-	public static HashMap<String, String> mappingGeneIdGeneName = null;
+	public static HashMap<String, HashSet<String>> mappingGeneIdGeneName = null;
 	public static int l1 = -1;
 	public static HashMap<String, Integer> geneIndex = null;
 	public static HashMap<String, Integer> barcodeIndex = null;

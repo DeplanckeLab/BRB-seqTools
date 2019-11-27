@@ -395,6 +395,19 @@ public class Utils
 		return keys;
 	}
 	
+	public static String toString(HashSet<String> str)
+	{
+		if(str == null) return "";
+		StringBuffer sb = new StringBuffer();
+		String prefix = "";
+		for(String s:str)
+		{
+			sb.append(prefix).append(s);
+			prefix = ",";
+		}
+		return sb.toString();
+	}
+	
 	public static String toReadableTime(long ms)
 	{
 		if(ms < 1000) return ""+ms+" ms";

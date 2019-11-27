@@ -1,7 +1,6 @@
 package model;
 
 import java.io.BufferedReader;
-import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.List;
@@ -18,16 +17,16 @@ public class GTF
 	{
 		System.out.println("\nReading GTF file provided: " + Parameters.inputGTFFile.getAbsolutePath());
 		Parameters.geneIndex = new HashMap<String, Integer>(); // Fill this as we go
-		Parameters.mappingGeneIdGeneName = new HashMap<String, String>(); // For filling final matrices
+		Parameters.mappingGeneIdGeneName = new HashMap<String, HashSet<String>>(); // For filling final matrices
 		BufferedReader br = Utils.readGTF(Parameters.inputGTFFile);
 		String line = br.readLine();
+		int line_number = 0;
 		forest = new HashMap<>();
 		int nbExons = 0;
 		int nbGenes = 0;
-		HashSet<String> uniqueGeneId = new HashSet<String>();
-		ArrayList<String> uniqueGeneName = new ArrayList<String>(); // It's actually not unique and should not be since two geneID can have the same gene Name => ArrayList
 		while(line != null)
 		{
+			line_number++;
 	    	if(!line.startsWith("#") && !line.trim().equals(""))
     		{
 				String[] tokens = line.split("\t");
@@ -51,46 +50,42 @@ public class GTF
 					}
 				}
 				if(gene_name == null) gene_name = gene_id;
-				if(gene_id != null)
+				if(gene_id == null) System.err.println("[WARNING] l." + line_number + "\t: No gene_id. This entry is ignored.");
+				else
 				{
+					HashSet<String> names = Parameters.mappingGeneIdGeneName.get(gene_id);
+					if(names == null) // First time we see this gene_id
+					{
+						names = new HashSet<String>();
+						Parameters.geneIndex.put(gene_id, nbGenes);
+						nbGenes++;
+					}
+					names.add(gene_name);
+					Parameters.mappingGeneIdGeneName.put(gene_id, names);
 					// Which type is it?
 					if(type.equals("exon")) 
 					{
 						nbExons++;
 						IntervalTree tree = forest.get(chr);
 						if(tree == null) tree = new IntervalTree();
-						if(uniqueGeneId.add(gene_id)) uniqueGeneName.add(gene_name);
 						tree.insert(new IntervalLabelled((int)start, (int)end, gene_id, strand));
 						forest.put(chr, tree);
-					}
-					else if(type.equals("gene"))
-					{
-						Parameters.geneIndex.put(gene_id, nbGenes);
-						Parameters.mappingGeneIdGeneName.put(gene_id, gene_name);
-						nbGenes++;
 					}
 				}
 			}
 			line = br.readLine();
 		}
 		br.close();
-		
-		if(nbGenes == 0) {
-			System.out.println("No Genes were detected in the GTF file. Probably the \"gene\" annotation is missing from the GTF file 3rd column?");
-			System.out.println("Trying to \"save the day\" by collapsing exons to their annotated gene_id");
-			for(String gene_id:uniqueGeneId) {
-				Parameters.geneIndex.put(gene_id, nbGenes);
-				Parameters.mappingGeneIdGeneName.put(gene_id, uniqueGeneName.get(nbGenes));
-				nbGenes++;
-			}
-		}
 
-		System.out.println(nbExons + " 'exons' are annotating " + uniqueGeneId.size() + " unique genes in the provided GTF file. In total " + nbGenes + " 'gene' annotations are found in the GTF file.");
-		
 		if(nbGenes == 0) {
 			System.err.println("We couldn't parse the GTF file. Please report this problem if the GTF is in standard format. Or use another GTF from another source.");
 			System.exit(-1);
 		}
+		
+		System.out.println(nbExons + " 'exons' are annotating " + nbGenes + " unique gene_ids in the provided GTF file.");
+		
+		System.out.println(Utils.toString(Parameters.mappingGeneIdGeneName.get("MSTRG.26637")));
+		System.out.println(Utils.toString(Parameters.mappingGeneIdGeneName.get("MSTRG.3370")));
 		
 		Parameters.geneIndex.put("__alignment_not_unique", Parameters.geneIndex.size());
 		Parameters.geneIndex.put("__no_feature", Parameters.geneIndex.size());

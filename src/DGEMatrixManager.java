@@ -181,16 +181,16 @@ public class DGEMatrixManager
 		int nbUMIs = 0;
 		for(String gene:sortedKeys)
 		{
-			String mappedGene = Parameters.mappingGeneIdGeneName.get(gene);
-			if(mappedGene == null) mappedGene = "";
-			if(!mappedGene.equals("")) {bw_reads.write(gene); if(Parameters.UMILength != -1) bw_umis.write(gene); }
-			bw_reads_detailed.write(gene + "\t" + mappedGene); 
-			if(Parameters.UMILength != -1) bw_umis_detailed.write(gene + "\t" + mappedGene);
+			HashSet<String> mappedGene = Parameters.mappingGeneIdGeneName.get(gene);
+			if(mappedGene != null) mappedGene.remove(gene);
+			if(mappedGene != null) {bw_reads.write(gene); if(Parameters.UMILength != -1) bw_umis.write(gene); }
+			bw_reads_detailed.write(gene + "\t" + Utils.toString(mappedGene)); 
+			if(Parameters.UMILength != -1) bw_umis_detailed.write(gene + "\t" + Utils.toString(mappedGene));
 			for(String barcode:Parameters.barcodeIndex.keySet()) 
 			{
 				String mappedBarcode = Parameters.mappingBarcodeName.get(barcode);
 				nbUMIs += umis[Parameters.barcodeIndex.get(barcode)][Parameters.geneIndex.get(gene)].getCorrectedSize();
-				if(!mappedGene.equals("") && mappedBarcode != null)
+				if(mappedGene != null && mappedBarcode != null)
 				{
 					bw_reads.write("\t" + counts[Parameters.barcodeIndex.get(barcode)][Parameters.geneIndex.get(gene)]);
 					if(Parameters.UMILength != -1) bw_umis.write("\t" + umis[Parameters.barcodeIndex.get(barcode)][Parameters.geneIndex.get(gene)].getCorrectedSize());
@@ -198,7 +198,7 @@ public class DGEMatrixManager
 				bw_reads_detailed.write("\t" + counts[Parameters.barcodeIndex.get(barcode)][Parameters.geneIndex.get(gene)]);
 				if(Parameters.UMILength != -1) bw_umis_detailed.write("\t" + umis[Parameters.barcodeIndex.get(barcode)][Parameters.geneIndex.get(gene)].getCorrectedSize());
 			}
-			if(!mappedGene.equals("")) { bw_reads.write("\n"); if(Parameters.UMILength != -1) bw_umis.write("\n"); }
+			if(mappedGene != null) { bw_reads.write("\n"); if(Parameters.UMILength != -1) bw_umis.write("\n"); }
 			bw_reads_detailed.write("\n"); if(Parameters.UMILength != -1) bw_umis_detailed.write("\n");
 		}
 		System.out.println(nbUMIs + " UMI counts were written (" + (nbReadsWritten - nbUMIs) + " duplicates = "+ Parameters.pcFormatter.format(((nbReadsWritten - nbUMIs) / (float)nbReadsWritten)*100) + "%)");
