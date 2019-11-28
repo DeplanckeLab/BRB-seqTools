@@ -36,6 +36,9 @@ After sequencing your BRB-seq libraries, you should obtain two fastq files per l
 BRB-seq tools is a suite dedicated to help you analyze these data, until the generation of the output count/UMI matrix.
 For further analyses (filtering, normalization, dimension reduction, clustering, differential expression), we recommend using [ASAP web portal](https://www.ncbi.nlm.nih.gov/pubmed/28541377) that you can freely access at [asap.epfl.ch](https://asap.epfl.ch).
 
+## Aligner
+BRB-seqTools was mainly tested with the STAR aligner. So far it seems to not working with the hisat2 aligner. Please contact me if it does not work with any other aligner, I'll try to have a look in the future, if this is a recurrent problem.
+
 ## Installation
 To check that BRB-seq Tools is working properly, run the following command:
 
