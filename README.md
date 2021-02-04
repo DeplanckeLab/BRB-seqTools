@@ -1,5 +1,5 @@
 ![](https://img.shields.io/badge/build-passing-green.svg)
-![](https://img.shields.io/badge/version-1.3-blue.svg)
+![](https://img.shields.io/badge/version-1.4.1-blue.svg)
 ![](https://img.shields.io/badge/picard-2.9.0-blue.svg)
 ![](https://img.shields.io/badge/java-1.8-red.svg)
 [![DOI](https://zenodo.org/badge/109837582.svg)](https://zenodo.org/badge/latestdoi/109837582)
@@ -8,7 +8,7 @@
 A suite of tools for the pre-processing of BRB-seq data (bulk RNA-seq)
 
 ## Download software
-BRB-seq command-line tools are provided as a [single executable jar file](../master/releases/BRBseqTools.1.3.jar?raw=true).
+BRB-seq command-line tools are provided as a [single executable jar file](../master/releases/BRBseqTools.1.4.jar?raw=true).
 The .jar file contains all required materials and can be run on any terminal.
 
 ## Dependencies
