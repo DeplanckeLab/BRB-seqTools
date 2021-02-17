@@ -1,5 +1,5 @@
 ![](https://img.shields.io/badge/build-passing-green.svg)
-![](https://img.shields.io/badge/version-1.4.1-blue.svg)
+![](https://img.shields.io/badge/version-1.6.0-blue.svg)
 ![](https://img.shields.io/badge/picard-2.9.0-blue.svg)
 ![](https://img.shields.io/badge/java-1.8-red.svg)
 [![DOI](https://zenodo.org/badge/109837582.svg)](https://zenodo.org/badge/latestdoi/109837582)
@@ -8,7 +8,7 @@
 A suite of tools for the pre-processing of BRB-seq data (bulk RNA-seq)
 
 ## Download software
-BRB-seq command-line tools are provided as a [single executable jar file](../master/releases/BRBseqTools.1.4.jar?raw=true).
+BRB-seq command-line tools are provided as a [single executable jar file](../master/releases/BRBseqTools-1.6.jar?raw=true).
 The .jar file contains all required materials and can be run on any terminal.
 
 ## Dependencies
@@ -52,6 +52,7 @@ Demultiplex     Create demultiplexed fastq files from R1+R2 fastq (use this if y
 CreateDGEMatrix Create the DGE Matrix (counts + UMI) from R2 aligned BAM and R1 fastq
 Trim            For trimming BRBseq construct in R2 fastq file or demultiplexed fastq files
 AnnotateBAM     For annotating the R2 BAM file using UMIs/Barcodes from the R1 fastq and/or GTF and/or Barcode files
+ExtractReadCountMatrix  For generating a read count matrix from a STAR-aligned BAM file.
 ```
 
 ## Example of full pipeline (using STAR)
@@ -101,6 +102,26 @@ Or you can upload this file to https://asap.epfl.ch and run the analysis pipelin
 
 ## Usage
 Here follows the description of each tool in more details.
+
+### ExtractReadCountMatrix
+This tool was recently added to BRBseq-Tools and is useful when using STARsolo for performing the whole pipeline (instead of BRBseq-Tools). The issue with STARsolo is that it does not generate the read count matrix (only the UMI count matrix). ExtractReadCountMatrix was specifically designed to retrieve the read count matrix from the BAM output from STARsolo.
+> **Note:** This tool allows to perform the whole pipeline with one STARsolo command (and eventually trim via cutadapt). It will probably become the method of choice for processing BRB-seq datasets, given STARsolo performances.
+
+Options:
+```
+-b %s           [Required] Path of STAR-aligned BAM file to analyze.
+-c %s           [Required] Path of Barcode/Samplename mapping file.
+-gtf %s         [Required] Path of GTF file.
+-o %s           Output folder
+-chunkSize %i   Maximum number of reads to be stored in RAM (default = 1000000)
+```
+
+¹You can download/edit this **[example of barcode/samplename mapping file](../master/examples/lib_example_barcodes.txt)**
+
+Example:
+```bash
+java -jar BRBseqTools.jar ExtractReadCountMatrix -b STAR_solo_aligned.bam -c lib_example_barcodes.txt -gtf hg38.gtf
+```
 
 ### Demultiplex
 This tool is used when you need to generate all the fastq files corresponding to all your multiplexed samples. You end up with one fastq file per sample.
