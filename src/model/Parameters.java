@@ -11,7 +11,7 @@ enum Strand{NO, YES, REVERSE};
 
 public class Parameters 
 {
-	public static final String currentVersion = "1.3";
+	public static final String currentVersion = "1.6";
 	
 	// Input parameters
 	public static String tmpFolder = null;
@@ -35,6 +35,7 @@ public class Parameters
 	public static String libname = "LIB-UNKNOWN";
 	public static String platform = "ILLUMINA";
 	public static String separator = ":";
+	public static boolean keep_multiple_mapped_reads = false;
 	
 	// Computed variables
 	public static HashSet<String> readGroups = new HashSet<String>();
@@ -44,6 +45,7 @@ public class Parameters
 	public static int mapped = 0;
 	public static int unmapped = 0;
 	public static int toolowAqual = 0;
+	public static int notDemultiplexed = 0;
 	public static double readLength = 0;
 	public static int nbTmpFastq = 0;
 	public static int nbTmpBAM = 0;
@@ -398,6 +400,9 @@ public class Parameters
 							System.exit(-1);
 						}
 						break;
+					case "--multiple-mapped":
+						keep_multiple_mapped_reads = true;
+						break;
 					default:
 						System.err.println("Unused argument: " + args[i]);
 				}
@@ -439,6 +444,7 @@ public class Parameters
 		if(UMILength != -1) System.out.println("Maximum allowed Hamming distance for sequencing error correction [UMI] = " + hammingDistanceUMI);
 		System.out.println("ChunkSize = " + chunkSize + " i.e. no more than " + chunkSize + " reads will be stored in RAM.");
 		System.out.println("Stranded = " + Parameters.stranded);
+		System.out.println("Multiple mapped reads will be " + ((keep_multiple_mapped_reads)?"KEPT":"DISCARDED"));
 		if(outputFolder == null)
 		{
 			String path = inputConfigFile.getAbsolutePath();
@@ -456,6 +462,121 @@ public class Parameters
 		if(!tmpFolder.endsWith("/")) tmpFolder+= "/";
 		outputFolder = outputFolder.replaceAll("\\\\", "/");
 		if(!outputFolder.endsWith("/")) outputFolder+= "/";
+		new File(outputFolder).mkdirs();
+	}
+	
+	public static void loadExtractReadCountMatrix(String[] args) throws Exception
+	{
+		if(args.length == 0)
+		{
+			printHelpExtractReadCountMatrix();
+			System.exit(0);
+		}
+		for(int i = 0; i < args.length; i++) 
+		{
+			if(args[i].startsWith("-"))
+			{
+				switch(args[i])
+				{
+					case "-o":
+						i++;
+						outputFolder = args[i];
+						outputFolder = outputFolder.replaceAll("\\\\", "/");
+						File f = new File(outputFolder);
+						if(!f.exists()) 
+						{
+							System.out.println("Output folder does not exist. Creating it");
+							f.mkdirs();
+						}
+						else if(!f.isDirectory()) throw new Exception(outputFolder + " is not a folder.");
+						if(!outputFolder.endsWith("/")) outputFolder+= "/";
+						break;
+					case "-c":
+						i++;
+						try
+						{
+							File c = new File(args[i]);
+							if(!c.exists()) throw new Exception("No file at path " + args[i]);
+							if(!c.isFile()) throw new Exception(args[i] + " is not a file");
+							inputConfigFile = c;
+						}
+						catch(Exception e)
+						{
+							System.err.println("The '-c' option should be followed by one config file path. " + e.getMessage() + ".");
+							System.exit(-1);
+						}
+						break;
+					case "-b":
+						i++;
+						try
+						{
+							File c = new File(args[i]);
+							if(!c.exists()) throw new Exception("No file at path " + args[i]);
+							if(!c.isFile()) throw new Exception(args[i] + " is not a file");
+							inputBAMFileR2 = c;
+						}
+						catch(Exception e)
+						{
+							System.err.println("The '-b' option should be followed by aligned BAM file path. " + e.getMessage() + ". You entered " + args[i]);
+							System.exit(-1);
+						}
+						break;
+					case "-gtf":
+						i++;
+						try
+						{
+							File c = new File(args[i]);
+							if(!c.exists()) throw new Exception("No file at path " + args[i]);
+							if(!c.isFile()) throw new Exception(args[i] + " is not a file");
+							inputGTFFile = c;
+						}
+						catch(Exception e)
+						{
+							System.err.println("The '-gtf' option should be followed by GTF file path. " + e.getMessage() + ". You entered " + args[i]);
+							System.exit(-1);
+						}
+						break;
+					case "-chunkSize":
+						i++;
+						try
+						{
+							chunkSize = Long.parseLong(args[i]);
+						}
+						catch(NumberFormatException nfe)
+						{
+							System.err.println("The '-chunkSize' option should be followed by an Integer. You entered " + args[i]);
+							System.exit(-1);
+						}
+						break;
+					default:
+						System.err.println("Unused argument: " + args[i]);
+				}
+			}
+		}
+		if(inputBAMFileR2 == null)
+		{
+			System.err.println("Please use '-b' option to specify the path of the aligned BAM file");
+			System.exit(-1);
+		}
+		if(inputConfigFile == null)
+		{
+			System.err.println("Please use '-c' option to specify a config file.");
+			System.exit(-1);
+		}
+		if(inputGTFFile == null)
+		{
+			System.err.println("Please use '-gtf' option to specify the path of the GTF file");
+			System.exit(-1);
+		}
+		if(outputFolder == null)
+		{
+			String path = inputConfigFile.getAbsolutePath();
+			path = path.replaceAll("\\\\", "/");
+			path = path.substring(0, path.lastIndexOf("/"));
+			System.out.println("No output Folder is specified, using default one: \""+path+"\". You can specify an output path by using the '-o' option.");
+			outputFolder = path;
+			if(!outputFolder.endsWith("/")) outputFolder+= "/";
+		}
 		new File(outputFolder).mkdirs();
 	}
 	
@@ -654,6 +775,9 @@ public class Parameters
 							System.err.println("The '-t' option should be followed by the path of a folder to store temporary files. " + e.getMessage() + ". You entered " + args[i]);
 							System.exit(-1);
 						}
+						break;
+					case "--multiple-mapped":
+						keep_multiple_mapped_reads = true;
 						break;
 					default:
 						System.err.println("Unused argument: " + args[i]);
@@ -856,7 +980,6 @@ public class Parameters
 	
 	private static void printHelpDGE()
 	{
-		System.out.println("BRBseq-tools " + Parameters.currentVersion + " [CreateDGEMatrix]\n\nOptions:");
 		System.out.println("-f %s \t\t[Required] Path of R1 FastQ file.");
 		System.out.println("-b %s \t\t[Required] Path of R2 aligned BAM file [do not need to be sorted or indexed].");
 		System.out.println("-c %s \t\t[Required] Path of Barcode/Samplename mapping file.");
@@ -866,6 +989,7 @@ public class Parameters
 		System.out.println("-nu %i \t\tNumber of allowed difference (hamming distance) for two UMIs to be counted only once [default = 1].");
 		System.out.println("-o %s \t\tOutput folder [default = folder of BAM file]");
 		System.out.println("-t %s \t\tPath of existing folder for storing temporary files [default = folder of BAM file]");
+		System.out.println("--multiple_mapped %s \t\tKeep multiple mapped read [default = discard them]");
 		System.out.println("-chunkSize %i\tMaximum number of reads to be stored in RAM [default = 1000000]");
 		System.out.println("-p %s \t\tBarcode pattern/order found in the reads of the R1 FastQ file. Barcode names should match the barcode file [default = 'BU', i.e. barcode followed by the UMI].\n\t\t\t'B' [Required] is used for specifying the barcode position.\n\t\t\t'U' can be used for specifying a UMI value position.\n\t\t\t'?' can be used to ignore specific nucleotides.");
 		System.out.println("-UMI %i \tIf your barcode pattern contains UMI ('U'), you should specify this parameter as the length of the UMI.");
@@ -873,7 +997,6 @@ public class Parameters
 	
 	private static void printHelpAnnoBAM()
 	{
-		System.out.println("BRBseq-tools " + Parameters.currentVersion + " [AnnotateBAM]\n\nOptions:");
 		System.out.println("-f %s \t\t[Required] Path of R1 FastQ file.");
 		System.out.println("-b %s \t\t[Required] Path of R2 aligned BAM file [do not need to be sorted or indexed].");
 		System.out.println("-c %s \t\tPath of Barcode/Samplename mapping file.");
@@ -883,6 +1006,7 @@ public class Parameters
 		System.out.println("-rg \t\tAdd Read Group information (for GATK / Picard MarkDuplicates / etc...).");
 		System.out.println("-o %s \t\tOutput folder");
 		System.out.println("-t %s \t\tPath of existing folder for storing temporary files");
+		System.out.println("--multiple_mapped %s \t\tKeep multiple mapped read [default = discard them]");
 		System.out.println("-chunkSize %i\tMaximum number of reads to be stored in RAM (default = 1000000)");
 		System.out.println("-p %s \t\tBarcode pattern/order found in the reads of the R1 FastQ file. Barcode names should match the barcode file (default = 'BU' i.e. barcode followed by the UMI).\n\t\t\t'B' [required] is used for specifying the barcode position.\n\t\t\t'U' [optional] can be used for specifying a UMI value position.\n\t\t\t'?' [optional] can be used to ignore specific nucleotides.");
 		System.out.println("-UMI %i \tYou should specify this parameter as the length of the UMI (required, since the duplicates are removed thanks to UMIs).");
@@ -890,7 +1014,6 @@ public class Parameters
 	
 	private static void printHelpDemultiplex()
 	{
-		System.out.println("BRBseq-tools " + Parameters.currentVersion + " [Demultiplex]\n\nOptions:");
 		System.out.println("-r1 %s \t\t[Required] Path of R1 FastQ files (containing barcode and optionally UMIs).");
 		System.out.println("-r2 %s \t\t[Required] Path of R2 FastQ files (containing read sequence).");
 		System.out.println("-c %s \t\t[Required] Path of Barcode/Samplename mapping file.");
@@ -902,7 +1025,6 @@ public class Parameters
 	
 	private static void printHelpTrim()
 	{
-		System.out.println("BRBseq-tools " + Parameters.currentVersion + " [Trim]\n\nOptions:");
 		System.out.println("-f %s \t\t[Required] Path of FastQ file to trim (or containing folder for processing all fastq files recursively).");
 		System.out.println("-o %s \t\tOutput folder");
 		System.out.println("-uniqueBarcode\tIf the fastq file(s) contain(s) only one barcode (for e.g. after demultiplexing), this option can be used for searching the specific barcode (most occuring) in the construct and trimming it when present.");
@@ -910,12 +1032,22 @@ public class Parameters
 		System.out.println("-minLength %i \tIf resulting trimmed reads are < this number, it is removed from the output fastq file  [default=10]");
 	}
 	
+	private static void printHelpExtractReadCountMatrix()
+	{
+		System.out.println("-b %s \t\t[Required] Path of STAR-aligned BAM file to analyze.");
+		System.out.println("-c %s \t\t[Required] Path of Barcode/Samplename mapping file.");
+		System.out.println("-gtf %s \t[Required] Path of GTF file.");
+		System.out.println("-o %s \t\tOutput folder");
+		System.out.println("-chunkSize %i\tMaximum number of reads to be stored in RAM (default = 1000000)");
+	}
+	
 	public static void printHelp()
 	{
 		System.out.println("BRBseq-tools " + Parameters.currentVersion + "\n\nOptions:");
-		System.out.println("CreateDGEMatrix\tCreate the DGE Matrix (counts + UMI) from R2 aligned BAM and R1 fastq");
-		System.out.println("Demultiplex\tCreate demultiplexed fastq files from R1+R2 fastq (use this if you want to process them independently, if not, use the CreateDGEMatrix option)");
-		System.out.println("Trim\t\tFor trimming BRBseq construct in R2 fastq file or demultiplexed fastq files.");
+		System.out.println("CreateDGEMatrix\t\tCreate the DGE Matrix (counts + UMI) from R2 aligned BAM and R1 fastq");
+		System.out.println("Demultiplex\t\tCreate demultiplexed fastq files from R1+R2 fastq (use this if you want to process them independently, if not, use the CreateDGEMatrix option)");
+		System.out.println("Trim\t\t\tFor trimming BRBseq construct in R2 fastq file or demultiplexed fastq files.");
 		System.out.println("AnnotateBAM\t\tFor annotating the BAM file using UMIs/Barcodes from the fastq file.");
+		System.out.println("ExtractReadCountMatrix\tFor generating a read count matrix from a STAR-aligned BAM file.");
 	}
 }

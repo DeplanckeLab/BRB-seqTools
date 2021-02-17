@@ -43,6 +43,19 @@ public class BRBseqTools
 					DGEMatrixManager.readR2BAM();
 					DGEMatrixManager.createOutputDGE();
 					break;
+				case "ExtractReadCountMatrix":
+					System.out.println("BRBSeqTools " + Parameters.currentVersion + " [ExtractReadCountMatrix]\n");
+					Parameters.loadExtractReadCountMatrix(argsParsed);
+					Parameters.barcodes = Utils.readConfig();
+					Parameters.BC1 = new ArrayList<String>();
+					Parameters.barcodeIndex = new HashMap<String, Integer>();
+					for(String B1:Parameters.barcodes) Parameters.BC1.add(B1);
+					for(int i = 0; i < Parameters.BC1.size(); i++) Parameters.barcodeIndex.put(Parameters.BC1.get(i), i);
+					System.out.println(Parameters.barcodeIndex.size() + " samples in barcode file.");
+					Parameters.barcodeIndex.put("Unknown", Parameters.barcodeIndex.size());
+					GTF.readGTF();
+					ExtractReadCountMatrixManager.extract();
+					break;
 				case "AnnotateBAM":
 					System.out.println("BRBSeqTools " + Parameters.currentVersion + " [AnnotateBAM]\n");
 					Parameters.loadAnnoBAM(argsParsed);

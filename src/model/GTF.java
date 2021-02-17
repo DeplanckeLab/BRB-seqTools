@@ -84,9 +84,6 @@ public class GTF
 		
 		System.out.println(nbExons + " 'exons' are annotating " + nbGenes + " unique gene_ids in the provided GTF file.");
 		
-		System.out.println(Utils.toString(Parameters.mappingGeneIdGeneName.get("MSTRG.26637")));
-		System.out.println(Utils.toString(Parameters.mappingGeneIdGeneName.get("MSTRG.3370")));
-		
 		Parameters.geneIndex.put("__alignment_not_unique", Parameters.geneIndex.size());
 		Parameters.geneIndex.put("__no_feature", Parameters.geneIndex.size());
 		Parameters.geneIndex.put("__ambiguous", Parameters.geneIndex.size());

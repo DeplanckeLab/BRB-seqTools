@@ -45,12 +45,7 @@ public class DGEMatrixManager
 			
 			String toAdd = samRecord.getReadName();
 			
-			if(samRecord.getSupplementaryAlignmentFlag())
-			{
-				Parameters.notUnique++;
-				toAdd += "\t__alignment_not_unique\t";
-			}
-			else if(samRecord.getReadUnmappedFlag())
+			if(samRecord.getReadUnmappedFlag())
 			{
 				Parameters.unmapped++;
 				toAdd += "\t__not_aligned\t";
@@ -62,23 +57,36 @@ public class DGEMatrixManager
 			}
 			else
 			{
-				HashSet<String> overlappingGenes = Utils.getOverlappingGenes(samRecord.getReferenceName(), samRecord.getAlignmentStart(), samRecord.getAlignmentEnd(), samRecord.getCigar(), samRecord.getReadNegativeStrandFlag());
-				if(overlappingGenes.size() == 0)
+				boolean toProcess = true;
+				if(samRecord.getSupplementaryAlignmentFlag())
 				{
-					Parameters.noFeature++;
-					toAdd += "\t__no_feature\t";
-				} 
-				else if(overlappingGenes.size() == 1)	
-				{
-					Parameters.mapped++;
-					String gene = overlappingGenes.iterator().next();
-					uniqueGenes.add(gene);
-					toAdd += "\t" + gene+ "\t";
+					Parameters.notUnique++;
+					if(!Parameters.keep_multiple_mapped_reads)
+					{
+						toAdd += "\t__alignment_not_unique\t";
+						toProcess = false;
+					}
 				}
-				else
+				if(toProcess)
 				{
-					Parameters.ambiguous++;
-					toAdd += "\t__ambiguous\t";
+					HashSet<String> overlappingGenes = Utils.getOverlappingGenes(samRecord.getReferenceName(), samRecord.getAlignmentStart(), samRecord.getAlignmentEnd(), samRecord.getCigar(), samRecord.getReadNegativeStrandFlag());
+					if(overlappingGenes.size() == 0)
+					{
+						Parameters.noFeature++;
+						toAdd += "\t__no_feature\t";
+					} 
+					else if(overlappingGenes.size() == 1)	
+					{
+						Parameters.mapped++;
+						String gene = overlappingGenes.iterator().next();
+						uniqueGenes.add(gene);
+						toAdd += "\t" + gene+ "\t";
+					}
+					else
+					{
+						Parameters.ambiguous++;
+						toAdd += "\t__ambiguous\t";
+					}
 				}
 			}
 			lines.add(toAdd + samRecord.getAlignmentStart() + "\t" + samRecord.getAlignmentEnd());

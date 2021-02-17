@@ -77,21 +77,23 @@ public class DemultiplexingManager
 		System.out.println(Parameters.nbReads + " reads were processed from R1 & R2 fastq files [" + Utils.toReadableTime(System.currentTimeMillis() - start) + "]");
 
 		// Summary Files
-		bw.get("stats").write("--Demultiplexing Parameters--\n");
-		bw.get("stats").write("R1 fastq file\t\t" + Parameters.inputFastQFileR1 + "\n");
-		bw.get("stats").write("R2 fastq file\t\t" + Parameters.inputFastQFileR2 + "\n");
+		bw.get("stats").write("Demultiplexing Parameters\n");
+		bw.get("stats").write("R1 fastq file\t" + Parameters.inputFastQFileR1 + "\n");
+		bw.get("stats").write("R2 fastq file\t" + Parameters.inputFastQFileR2 + "\n");
 		bw.get("stats").write("Path of barcode/samplename mapping file\t" + Parameters.inputConfigFile + "\n");
 		bw.get("stats").write("Nb allowed barcode mismatch\t" + Parameters.nbAllowedDiff + "\n");
 		bw.get("stats").write("Output folder\t" + Parameters.outputFolder + "\n");
 		bw.get("stats").write("Barcode pattern in R1\t" + Parameters.barcodePattern + "\n");
 		if(Parameters.UMILength == -1) bw.get("stats").write("UMI length\tNO_UMI\n");
 		else bw.get("stats").write("UMI length\t" + Parameters.UMILength + "\n");
-		bw.get("stats").write("\n--Demultiplexing Summary--\n");
-		bw.get("stats").write("Total number of reads\t" + Parameters.nbReads + "\n");
-		bw.get("stats").write("Undetermined Barcodes\t" + noBarcodeMatch + "\t(" + Parameters.pcFormatter.format(((double)noBarcodeMatch / Parameters.nbReads) * 100) + " %)\n");
-		bw.get("stats").write("Determined Barcodes\t\t" + (Parameters.nbReads - noBarcodeMatch) + "\t(" + Parameters.pcFormatter.format(((double)(Parameters.nbReads - noBarcodeMatch) / Parameters.nbReads) * 100) + " %)\n");
-		bw.get("stats").write("\n--Demultiplexing Details--\n");
-		for (String B1:Parameters.BC1) bw.get("stats").write(Parameters.mappingBarcodeName.get(B1) + " barcode\t" + nbReadsPerBarcode.get(B1) + " reads are found\t(" + Parameters.pcFormatter.format(((double)nbReadsPerBarcode.get(B1) / Parameters.nbReads) * 100) + "%)\n");
+		bw.get("stats").write("\nDemultiplexing Summary\n");
+		bw.get("stats").write("Summary\tNb_Reads\tPercent\n");
+		bw.get("stats").write("Total number of reads\t" + Parameters.nbReads + "\t100\n");
+		bw.get("stats").write("Undetermined Barcodes\t" + noBarcodeMatch + "\t" + Parameters.pcFormatter.format(((double)noBarcodeMatch / Parameters.nbReads) * 100) + "\n");
+		bw.get("stats").write("Determined Barcodes\t" + (Parameters.nbReads - noBarcodeMatch) + "\t" + Parameters.pcFormatter.format(((double)(Parameters.nbReads - noBarcodeMatch) / Parameters.nbReads) * 100) + "\n");
+		bw.get("stats").write("\nDemultiplexing Details\n");
+		bw.get("stats").write("Barcode\tDemult_Reads\tPercent\n");
+		for (String B1:Parameters.BC1) bw.get("stats").write(Parameters.mappingBarcodeName.get(B1) + "\t" + nbReadsPerBarcode.get(B1) + "\t" + Parameters.pcFormatter.format(((double)nbReadsPerBarcode.get(B1) / Parameters.nbReads) * 100) + "\n");
 
 		// Close Writing Buffers
 		for (String key:bw.keySet()) bw.get(key).close();

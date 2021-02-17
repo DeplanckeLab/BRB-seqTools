@@ -52,12 +52,7 @@ public class AnnotateBAMManager
 			
 			if(Parameters.inputGTFFile != null)
 			{
-				if(samRecord.getSupplementaryAlignmentFlag())
-				{
-					Parameters.notUnique++;
-					bamRecord.record.setAttribute("CO", "__alignment_not_unique");
-				}
-				else if(samRecord.getReadUnmappedFlag())
+				if(samRecord.getReadUnmappedFlag())
 				{
 					Parameters.unmapped++;
 					bamRecord.record.setAttribute("CO", "__not_aligned");
@@ -69,23 +64,36 @@ public class AnnotateBAMManager
 				}
 				else
 				{
-					HashSet<String> overlappingGenes = Utils.getOverlappingGenes(samRecord.getReferenceName(), samRecord.getAlignmentStart(), samRecord.getAlignmentEnd(), samRecord.getCigar(), samRecord.getReadNegativeStrandFlag());
-					if(overlappingGenes.size() == 0)
+					boolean toProcess = true;
+					if(samRecord.getSupplementaryAlignmentFlag())
 					{
-						Parameters.noFeature++;
-						bamRecord.record.setAttribute("CO", "__no_feature");
-					} 
-					else if(overlappingGenes.size() == 1)	
-					{
-						Parameters.mapped++;
-						String gene = overlappingGenes.iterator().next();
-						uniqueGenes.add(gene);
-						bamRecord.record.setAttribute("CO", gene);
+						Parameters.notUnique++;
+						if(!Parameters.keep_multiple_mapped_reads)
+						{
+							bamRecord.record.setAttribute("CO", "__alignment_not_unique");
+							toProcess = false;
+						}
 					}
-					else
+					if(toProcess)
 					{
-						Parameters.ambiguous++;
-						bamRecord.record.setAttribute("CO", "__ambiguous");
+						HashSet<String> overlappingGenes = Utils.getOverlappingGenes(samRecord.getReferenceName(), samRecord.getAlignmentStart(), samRecord.getAlignmentEnd(), samRecord.getCigar(), samRecord.getReadNegativeStrandFlag());
+						if(overlappingGenes.size() == 0)
+						{
+							Parameters.noFeature++;
+							bamRecord.record.setAttribute("CO", "__no_feature");
+						} 
+						else if(overlappingGenes.size() == 1)	
+						{
+							Parameters.mapped++;
+							String gene = overlappingGenes.iterator().next();
+							uniqueGenes.add(gene);
+							bamRecord.record.setAttribute("CO", gene);
+						}
+						else
+						{
+							Parameters.ambiguous++;
+							bamRecord.record.setAttribute("CO", "__ambiguous");
+						}
 					}
 				}
 			}
