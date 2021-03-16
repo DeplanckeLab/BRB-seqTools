@@ -46,7 +46,7 @@ public class ExtractReadCountMatrixManager
 				Parameters.nbReads++;
 
 				String barcode = (String)samRecord.getAttribute("CB");
-				if(barcode == null) 
+				if(barcode == null || barcode.equals("-")) // New in STAR, now unknown barcodes are labelled '-' instead of the CB tag being nonexistent.
 				{
 					barcode = "Unknown";
 					Parameters.notDemultiplexed++;
