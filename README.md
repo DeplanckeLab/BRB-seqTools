@@ -15,9 +15,9 @@ In particular, do NOT use the output of the Trimming step of BRB-seq Tools as in
 An example of command that you can run to align + demultiplex BRB-seq libraries:
 ```bash
 STAR --runMode alignReads --soloUMIdedup 1MM_Directional --soloCBmatchWLtype 1MM --clipAdapterType CellRanger4 --outSAMmapqUnique 60 --outSAMunmapped Within --soloStrand Forward --quantMode GeneCounts --genomeDir STAR_Index/ --soloType CB_UMI_Simple --soloCBstart 1 --soloCBlen 12 --soloUMIstart 13 --soloUMIlen 16 --soloCellFilter None --soloCBwhitelist lib_example_barcodes.txt --soloFeatures Gene --outSAMattributes NH HI nM AS CR UR CB UB GX GN sS sQ sM --outFilterMultimapNmax 1 --readFilesCommand zcat --outSAMtype BAM SortedByCoordinate --outFileNamePrefix bam/lib_example/ --readFilesIn lib_example_R2.fastq.gz lib_example_R1.fastq.gz
-
-# Note: Here, the ``lib_example_barcodes.txt`` file should be a list of barcodes, one per line.
 ```
+
+> **Note:** Here, the ``lib_example_barcodes.txt`` file should be a list of barcodes, one per line.
 
 Of course, you can also add some other options like:
 - ``--runThreadN 12 --outBAMsortingThreadN 12`` to run STAR in parallel on 12 threads (or more, or less)
