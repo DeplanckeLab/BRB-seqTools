@@ -18,8 +18,8 @@ STAR --runMode alignReads --soloUMIdedup 1MM_Directional --soloCBmatchWLtype 1MM
 ```
 
 Of course, you can also add some other options like:
-``--runThreadN 12 --outBAMsortingThreadN 12`` to run STAR in parallel on 12 threads (or more, or less)
-``--soloCBstart 1 --soloCBlen 12 --soloUMIstart 13 --soloUMIlen 16`` this depends on your R1 sequence (check in the fastq file), and the barcodes that you are using
+- ``--runThreadN 12 --outBAMsortingThreadN 12`` to run STAR in parallel on 12 threads (or more, or less)
+- ``--soloCBstart 1 --soloCBlen 12 --soloUMIstart 13 --soloUMIlen 16`` this depends on your R1 sequence (check in the fastq file), and the barcodes that you are using
 
 ## Download software
 BRB-seq command-line tools are provided as a [single executable jar file](../master/releases/BRBseqTools-1.6.jar?raw=true).
