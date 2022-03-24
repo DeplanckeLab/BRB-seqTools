@@ -7,6 +7,11 @@
 # BRB-seq Tools
 A suite of tools for the pre-processing of BRB-seq data (bulk RNA-seq)
 
+## Recent notes (and for Alithea users)
+BRB-seq tools suite was created in the early days of multiplexed libraries, when there was not many other alternatives to analyze BRB-seq multiplexed libraries.
+Now, this is not the case anymore, so we would recommend using STARsolo instead, which should produce similar results in a fraction of the time.
+In particular, do NOT use the output of the Trimming step of BRB-seq Tools as input for STARsolo, as this will not produce correct UMI values (without displaying an error message). STARsolo can provide read trimming that matches BRB-seq specificities using the ``--clipAdapterType CellRanger4`` option
+
 ## Download software
 BRB-seq command-line tools are provided as a [single executable jar file](../master/releases/BRBseqTools-1.6.jar?raw=true).
 The .jar file contains all required materials and can be run on any terminal.
