@@ -82,12 +82,12 @@ public class ExtractReadCountMatrixManager
 						Parameters.mapped++;
 						String gene_id = (String)samRecord.getAttribute("GX");
 						String gene_name = (String)samRecord.getAttribute("GN");
-						if(gene_id == null && gene_name == null)
+						if ((gene_id == null || gene_id == "-") && (gene_name == null || gene_name== "-"))
 						{
 							Parameters.noFeature++;
 							count_matrix[indexBarcode][Parameters.geneIndex.get("__no_feature")]++;
 						}
-						else if(gene_id != null && gene_name != null)
+						else if(gene_id != null && gene_id!="-" && gene_name != null && gene_name != "-")
 						{
 							Integer indexGene = Parameters.geneIndex.get(gene_id);
 							if(indexGene == null)
