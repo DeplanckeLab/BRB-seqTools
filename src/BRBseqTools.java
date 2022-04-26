@@ -16,7 +16,7 @@ import tools.Utils;
  */
 public class BRBseqTools
 {	
-	// TODO Gérer les TMP files si meme folder
+	// TODO Gerer les TMP files si meme folder
 	// TODO Bug avec Tophat? Multiple Mapping?
 	public static void main(String[] args) throws Exception
 	{

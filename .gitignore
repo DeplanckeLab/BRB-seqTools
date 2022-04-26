@@ -1,0 +1,9 @@
+/.metadata/
+/target/
+/bin/
+/build2/
+/build3/
+/build/
+/lib
+manifest.mf 
+pom.xml
