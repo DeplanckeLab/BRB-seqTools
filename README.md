@@ -1,5 +1,5 @@
 ![](https://img.shields.io/badge/build-passing-green.svg)
-![](https://img.shields.io/badge/version-1.6.0-blue.svg)
+![](https://img.shields.io/badge/version-1.6.1-blue.svg)
 ![](https://img.shields.io/badge/picard-2.9.0-blue.svg)
 ![](https://img.shields.io/badge/java-1.8-red.svg)
 [![DOI](https://zenodo.org/badge/109837582.svg)](https://zenodo.org/badge/latestdoi/109837582)
@@ -24,7 +24,7 @@ Of course, you can also add some other options like:
 - ``--soloCBstart 1 --soloCBlen 12 --soloUMIstart 13 --soloUMIlen 16`` this depends on your R1 sequence (check in the fastq file), and the barcodes that you are using
 
 ## Download software
-BRB-seq command-line tools are provided as a [single executable jar file](../master/releases/BRBseqTools-1.6.jar?raw=true).
+BRB-seq command-line tools are provided as a [single executable jar file](../master/releases/BRBseqTools-1.6.1.jar?raw=true).
 The .jar file contains all required materials and can be run on any terminal.
 
 ## Dependencies
