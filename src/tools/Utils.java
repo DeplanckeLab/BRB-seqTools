@@ -93,8 +93,11 @@ public class Utils
 		String header = br.readLine(); // Get first line = READNAME + INDEX
 		if(header == null) return null;
 		if(!header.startsWith("@")) throw new Exception("R1 fastq file has formatting issues");
-		read.name = header.substring(1, header.indexOf(" "));
-		String indexes = br.readLine().trim(); // Get second line = READ
+		int index = header.indexOf(" ");
+		if(index > 0) read.name = header.substring(1, index);
+		else read.name = header.substring(1);
+		if(read.name.endsWith("/1") || read.name.endsWith("/2")) read.name = read.name.substring(0, read.name.length() - 2);
+		String indexes = br.readLine().trim(); // Get second line = READ SEQUENCE
 		if(indexes.length() != Parameters.lengthBarcode) // Checking the length is OK
 		{
 			br.close();
