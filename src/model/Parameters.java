@@ -11,7 +11,7 @@ enum Strand{NO, YES, REVERSE};
 
 public class Parameters 
 {
-	public static final String currentVersion = "1.6";
+	public static final String currentVersion = "1.6.1";
 	
 	// Input parameters
 	public static String tmpFolder = null;
