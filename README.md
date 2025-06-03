@@ -5,7 +5,7 @@
 [![DOI](https://zenodo.org/badge/109837582.svg)](https://zenodo.org/badge/latestdoi/109837582)
 
 # BRB-seq Tools
-A suite of tools for the pre-processing of BRB-seq data (bulk RNA-seq)
+[Deprecated] A suite of tools for the pre-processing of BRB-seq data (bulk RNA-seq)
 
 ## :warning: Recent notes
 BRB-seq tools suite was created in the early days of multiplexed libraries, when there was not many other alternatives to analyze BRB-seq libraries. Now, this is not the case anymore, so we would recommend using **STARsolo** instead, which should produce similar results in a single command.
