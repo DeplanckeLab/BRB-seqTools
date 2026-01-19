@@ -25,15 +25,22 @@ public class Read implements Comparable<Read>
 		return this.name.compareTo(r2.name);
 	}
 	
-	public void write(BufferedWriter bw, String UMI) throws IOException
+	public void write(BufferedWriter bw, String barcode, String UMI) throws IOException
 	{
 		if(rawData != null && rawData.length == 4)
 		{
-			if(UMI != null) bw.write(rawData[0] + Parameters.separator + UMI + "\n");
-			else bw.write(rawData[0] + "\n");
-			bw.write(rawData[1] + "\n");
-			bw.write(rawData[2] + "\n");
-			bw.write(rawData[3] + "\n");
+			if(UMI != null)
+			{
+				bw.write(rawData[0].replaceFirst(name, name + "_" + barcode + "_" + UMI)); // Barcode should be corrected, if possible
+			}
+			else bw.write(rawData[0]); // In this case I don't even write the barcode
+			bw.newLine();
+			bw.write(rawData[1]);
+			bw.newLine();
+			bw.write(rawData[2]);
+			bw.newLine();
+			bw.write(rawData[3]);
+			bw.newLine();
 		}
 	}
 }

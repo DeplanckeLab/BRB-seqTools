@@ -1,19 +1,21 @@
---Demultiplexing Parameters--
-R1 fastq file		../examples/lib_example_R1.fastq.gz
-R2 fastq file		../examples/lib_example_R2.fastq.gz
-Path of barcode/samplename mapping file	../examples/lib_example_barcodes.txt
+Demultiplexing Parameters
+R1 fastq file	C:\Users\gardeux\Desktop\lib_example_R1.fastq.gz
+R2 fastq file	C:\Users\gardeux\Desktop\lib_example_R2.fastq.gz
+Path of barcode/samplename mapping file	C:\Users\gardeux\Desktop\lib_example_barcodes.txt
 Nb allowed barcode mismatch	1
-Output folder	/mnt/d/GitHub/BRB-seq_Tools/releases/../examples/
+Output folder	C:/Users/gardeux/Desktop/
 Barcode pattern in R1	BU
 UMI length	14
 
---Demultiplexing Summary--
-Total number of reads	100000
-Undetermined Barcodes	1930	(1.93 %)
-Determined Barcodes		98070	(98.07 %)
+Demultiplexing Summary
+Summary	Nb_Reads	Percent
+Total number of reads	100000	100
+Undetermined Barcodes	1930	1,93
+Determined Barcodes	98070	98,07
 
---Demultiplexing Details--
-T14A barcode	30569 reads are found	(30.57%)
-T0A barcode	19002 reads are found	(19%)
-T0B barcode	23985 reads are found	(23.98%)
-T14B barcode	24514 reads are found	(24.51%)
+Demultiplexing Details
+Barcode	Demult_Reads	Percent
+T14A	30569	30,57
+T0A	19002	19
+T0B	23985	23,98
+T14B	24514	24,51

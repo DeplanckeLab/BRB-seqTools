@@ -11,7 +11,7 @@ enum Strand{NO, YES, REVERSE};
 
 public class Parameters 
 {
-	public static final String currentVersion = "1.6.1";
+	public static final String currentVersion = "1.7.0";
 	
 	// Input parameters
 	public static String tmpFolder = null;
@@ -34,7 +34,6 @@ public class Parameters
 	public static boolean addReadGroup = false;
 	public static String libname = "LIB-UNKNOWN";
 	public static String platform = "ILLUMINA";
-	public static String separator = ":";
 	public static boolean keep_multiple_mapped_reads = false;
 	
 	// Computed variables

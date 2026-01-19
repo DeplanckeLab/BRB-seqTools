@@ -38,16 +38,6 @@ public class DemultiplexingManager
 		Read read1 = Utils.nextRead(br, false);
 		Read read2 = Utils.nextDataRead(br2);
 		
-		// Check the separator for writing UMI in output fastq files
-		char lastChar = read2.rawData[0].charAt(read2.rawData[0].length() - 1);
-		if(lastChar == 'G' || lastChar == 'A' || lastChar == 'C' || lastChar == 'T') Parameters.separator = "+";
-		else if(lastChar == ':') Parameters.separator = "";
-		else if(lastChar == 'N')			
-		{
-			lastChar = read2.rawData[0].charAt(read2.rawData[0].length() - 2); // check character before
-			if(lastChar != ':') Parameters.separator = "+";
-		}
-		
 		// Read the 2 fastq files
 		while(read1 != null) // For each read
 		{
@@ -57,12 +47,12 @@ public class DemultiplexingManager
 			if(!read1.barcodeMatch) 
 			{
 				noBarcodeMatch++; 
-				read2.write(bw.get("undetermined"), read1.UMI);
+				read2.write(bw.get("undetermined"), read1.barcode, read1.UMI);
 			}
 			else
 			{
 				nbReadsPerBarcode.put(read1.barcode, nbReadsPerBarcode.get(read1.barcode) + 1);
-				if(read1.name.equals(read2.name)) read2.write(bw.get(read1.barcode), read1.UMI);
+				if(read1.name.equals(read2.name)) read2.write(bw.get(read1.barcode), read1.barcode, read1.UMI);
 				else
 				{
 					System.err.println("ERROR: Read names do not match: R1= " + read1.name + " & R2= " + read2.name + "\nOf note: Both fastq (R1 & R2) should contain reads sorted in the same order (should be the case by default)");
