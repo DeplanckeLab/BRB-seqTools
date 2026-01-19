@@ -1,6 +1,6 @@
 ![](https://img.shields.io/badge/build-passing-green.svg)
-![](https://img.shields.io/badge/version-1.6.1-blue.svg)
-![](https://img.shields.io/badge/picard-2.9.0-blue.svg)
+![](https://img.shields.io/badge/version-1.7.0-blue.svg)
+![](https://img.shields.io/badge/htsjdk-2.24.1-blue.svg)
 ![](https://img.shields.io/badge/java-1.8-red.svg)
 [![DOI](https://zenodo.org/badge/109837582.svg)](https://zenodo.org/badge/latestdoi/109837582)
 
@@ -40,9 +40,6 @@ java -version
 
 If the output looks something like java version "1.8.x", you are good to go. 
 If not, you may need to update your version; see the [Oracle Java website](http://www.oracle.com/technetwork/java/javase/downloads/) to download the latest JRE (for users) or JDK (for developers).
-
-### Picard
-The software relies on [Picard Tools](http://broadinstitute.github.io/picard/), but the Picard JAR is already embedded in the released JAR, so no need to install it yourself.
 
 ## Sequencing output
 After sequencing your BRB-seq libraries, you should obtain two fastq files per library: 
@@ -168,7 +165,7 @@ or, if no UMI:
 java -jar BRBseqTools.jar Demultiplex -r1 lib_example_R1.fastq.gz -r2 lib_example_R2.fastq.gz -c lib_example_barcodes.txt -p B
 ```
 
-> **Note:** When using this tool, UMIs are kept as indexes in all output .fastq files
+> **Note:** When using this tool, UMIs are kept in readnames in all output .fastq files. This should be compatible with umi_tools suite
 
 ### CreateDGEMatrix
 This tool is used when you don't need the intermediary .fastq & .bam files from all your multiplexed samples.
