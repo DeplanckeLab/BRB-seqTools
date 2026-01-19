@@ -178,7 +178,9 @@ public class Utils
 		String header = br.readLine(); // Get first line = READNAME + INDEX
 		if(header == null) return null;
 		if(!header.startsWith("@")) throw new Exception("R2 fastq file has formatting issues");
-		read.name = header.substring(1, header.indexOf(" "));
+		int index = header.indexOf(" ");
+		if(index == -1) read.name = header;
+		else read.name = header.substring(1, index);
 		read.rawData[0] = header; 
 		read.rawData[1] = br.readLine(); // Get second line = READ
 		read.rawData[2] = br.readLine(); // Get Third line = "+"
